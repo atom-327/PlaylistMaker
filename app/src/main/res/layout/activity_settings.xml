@@ -3,7 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
     android:orientation="vertical">
 
     <FrameLayout
@@ -19,32 +18,18 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/returnButton"
-                android:layout_width="@dimen/_48dp"
-                android:layout_height="@dimen/_48dp"
-                android:backgroundTint="@color/white"
-                app:cornerRadius="@dimen/_0dp"
+                android:id="@+id/settingsReturnButton"
+                style="@style/TopButtonStyle"
                 app:icon="@drawable/arrowback"
                 app:iconGravity="textTop"
-                app:iconPadding="@dimen/_0dp"
-                app:iconTint="@color/black" />
+                app:iconPadding="@dimen/_0dp" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:paddingLeft="@dimen/_12dp"
-                android:text="@string/options"
-                android:textColor="@color/black"
-                android:textSize="@dimen/_22sp" />
+                style="@style/TopTextStyle"
+                android:text="@string/options" />
         </LinearLayout>
 
-        <Button
-            android:layout_width="@dimen/_48dp"
-            android:layout_height="@dimen/_48dp"
-            android:layout_gravity="right"
-            android:backgroundTint="@color/white"
-            app:cornerRadius="@dimen/_0dp" />
+        <Button style="@style/TopButtonStyle" />
     </FrameLayout>
 
     <FrameLayout
@@ -53,84 +38,38 @@
         android:orientation="horizontal">
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:paddingLeft="@dimen/_16dp"
-            android:text="@string/dark_theme"
-            android:textColor="@color/black"
-            android:textSize="@dimen/_16dp" />
+            style="@style/SettingsButtonStyle"
+            android:text="@string/dark_theme" />
 
         <Switch
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right|center_vertical"
+            android:id="@+id/switchThemeButton"
+            style="@style/SettingsIconsStyle"
             android:layout_marginRight="6dp" />
     </FrameLayout>
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_61dp"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:paddingLeft="@dimen/_16dp"
-            android:text="@string/share_app"
-            android:textColor="@color/black"
-            android:textSize="@dimen/_16dp" />
+        <Button
+            android:id="@+id/shareButton"
+            style="@style/SettingsButtonStyle"
+            android:drawableRight="@drawable/toshare"
+            android:text="@string/share_app" />
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right|center_vertical"
-            android:layout_marginRight="@dimen/_12dp"
-            android:src="@drawable/toshare" />
-    </FrameLayout>
+        <Button
+            android:id="@+id/supportButton"
+            style="@style/SettingsButtonStyle"
+            android:drawableRight="@drawable/support"
+            android:text="@string/text_to_support" />
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/_61dp"
-        android:orientation="horizontal">
+        <Button
+            android:id="@+id/agreementButton"
+            style="@style/SettingsButtonStyle"
+            android:drawableRight="@drawable/arrowforward"
+            android:text="@string/user_agreement" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:paddingLeft="@dimen/_16dp"
-            android:text="@string/text_to_support"
-            android:textColor="@color/black"
-            android:textSize="@dimen/_16dp" />
+    </LinearLayout>
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right|center_vertical"
-            android:layout_marginRight="@dimen/_12dp"
-            android:src="@drawable/support" />
-    </FrameLayout>
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/_61dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:paddingLeft="@dimen/_16dp"
-            android:text="@string/user_agreement"
-            android:textColor="@color/black"
-            android:textSize="@dimen/_16dp" />
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right|center_vertical"
-            android:layout_marginRight="@dimen/_12dp"
-            android:src="@drawable/arrowforward" />
-    </FrameLayout>
 </LinearLayout>

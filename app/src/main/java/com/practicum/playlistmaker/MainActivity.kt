@@ -21,27 +21,17 @@ class MainActivity : AppCompatActivity() {
         val mediaButton = findViewById<Button>(R.id.media)
         val settingsButton = findViewById<Button>(R.id.options)
 
-//        val buttonClickListener: View.OnClickListener = object : View.OnClickListener {
-//            override fun onClick(v: View?) {
-//                Toast.makeText(this@MainActivity, "Переход в Поиск", Toast.LENGTH_SHORT).show()
-//            }
-//        }
-//
-//        searchButton.setOnClickListener(buttonClickListener)
-
         searchButton.setOnClickListener {
             val searchIntent = Intent(this, SearchActivity::class.java)
             startActivity(searchIntent)
         }
 
         mediaButton.setOnClickListener {
-//            Toast.makeText(this@MainActivity, "Переход в Медиа", Toast.LENGTH_SHORT).show()
             val mediaIntent = Intent(this, MediaActivity::class.java)
             startActivity(mediaIntent)
         }
 
         settingsButton.setOnClickListener {
-//            Toast.makeText(this@MainActivity, "Переход в Настройки", Toast.LENGTH_SHORT).show()
             val settingsIntent = Intent(this, SettingsActivity::class.java)
             startActivity(settingsIntent)
         }
