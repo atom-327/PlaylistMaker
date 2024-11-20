@@ -5,35 +5,17 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <FrameLayout
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="@dimen/_4dp">
+        android:theme="@style/Theme.Toolbar"
+        app:title="@string/search"
+        app:titleTextAppearance="@style/TopTextStyle">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+    </androidx.appcompat.widget.Toolbar>
 
-            <Button
-                android:id="@+id/searchReturnButton"
-                style="@style/TopButtonStyle"
-                app:icon="@drawable/arrowback"
-                app:iconGravity="textTop"
-                app:iconPadding="@dimen/_0dp" />
-
-            <TextView
-                style="@style/TopTextStyle"
-                android:text="@string/search"
-                android:textSize="26sp" />
-        </LinearLayout>
-
-        <Button style="@style/TopButtonStyle" />
-    </FrameLayout>
-
-    <LinearLayout
-        style="@style/SearchClearButton"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/_8dp"
@@ -43,18 +25,17 @@
         <EditText
             android:id="@+id/searchEditText"
             style="@style/SearchEditText"
-            android:layout_width="@dimen/_0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:drawableLeft="@drawable/loupe"
             android:hint="@string/search"
             android:inputType="text"
-            android:maxLines="1" />
+            android:maxLines="1"
+            android:textCursorDrawable="@color/blue" />
 
         <ImageView
             android:id="@+id/searchClearIcon"
             style="@style/SearchClearButton"
-            android:paddingRight="@dimen/_8dp"
             android:visibility="gone" />
-    </LinearLayout>
+    </FrameLayout>
 </LinearLayout>

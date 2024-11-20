@@ -11,6 +11,8 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.core.view.isVisible
 
 class SearchActivity : AppCompatActivity() {
     private var editTextValue: String = TEXT_VALUE
@@ -26,7 +28,7 @@ class SearchActivity : AppCompatActivity() {
 
         val inputEditText = findViewById<EditText>(R.id.searchEditText)
         val clearButton = findViewById<ImageView>(R.id.searchClearIcon)
-        val returnButton = findViewById<Button>(R.id.searchReturnButton)
+        val toolbarButton = findViewById<Toolbar>(R.id.toolbarButton)
 
         if (savedInstanceState != null) {
             editTextValue = savedInstanceState.getString(TEXT_KEY, TEXT_VALUE)
@@ -38,7 +40,7 @@ class SearchActivity : AppCompatActivity() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                clearButton.visibility = clearButtonVisibility(s)
+                clearButton.isVisible = !s.isNullOrEmpty()
                 println(s.toString())
                 editTextValue = s.toString()
             }
@@ -53,7 +55,7 @@ class SearchActivity : AppCompatActivity() {
             hideSoftKeyboard(it)
         }
 
-        returnButton.setOnClickListener {
+        toolbarButton.setNavigationOnClickListener {
             val returnIntent = Intent(this, MainActivity::class.java)
             startActivity(returnIntent)
             finish()

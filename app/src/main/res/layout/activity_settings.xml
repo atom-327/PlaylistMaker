@@ -5,71 +5,39 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <FrameLayout
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
-        android:orientation="horizontal"
-        android:padding="@dimen/_4dp">
+        android:theme="@style/Theme.Toolbar"
+        app:title="@string/settings"
+        app:titleTextAppearance="@style/TopTextStyle">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+    </androidx.appcompat.widget.Toolbar>
 
-            <Button
-                android:id="@+id/settingsReturnButton"
-                style="@style/TopButtonStyle"
-                app:icon="@drawable/arrowback"
-                app:iconGravity="textTop"
-                app:iconPadding="@dimen/_0dp" />
+    <Switch
+        android:id="@+id/switchThemeButton"
+        style="@style/SettingsButtonStyle"
+        android:layout_gravity="center_vertical"
+        android:text="@string/dark_theme" />
 
-            <TextView
-                style="@style/TopTextStyle"
-                android:text="@string/options" />
-        </LinearLayout>
+    <Button
+        android:id="@+id/shareButton"
+        style="@style/SettingsButtonStyle"
+        android:drawableRight="@drawable/toshare"
+        android:text="@string/share_app" />
 
-        <Button style="@style/TopButtonStyle" />
-    </FrameLayout>
+    <Button
+        android:id="@+id/supportButton"
+        style="@style/SettingsButtonStyle"
+        android:drawableRight="@drawable/support"
+        android:text="@string/text_to_support" />
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/_61dp"
-        android:orientation="horizontal">
-
-        <TextView
-            style="@style/SettingsButtonStyle"
-            android:text="@string/dark_theme" />
-
-        <Switch
-            android:id="@+id/switchThemeButton"
-            style="@style/SettingsIconsStyle"
-            android:layout_marginRight="6dp" />
-    </FrameLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <Button
-            android:id="@+id/shareButton"
-            style="@style/SettingsButtonStyle"
-            android:drawableRight="@drawable/toshare"
-            android:text="@string/share_app" />
-
-        <Button
-            android:id="@+id/supportButton"
-            style="@style/SettingsButtonStyle"
-            android:drawableRight="@drawable/support"
-            android:text="@string/text_to_support" />
-
-        <Button
-            android:id="@+id/agreementButton"
-            style="@style/SettingsButtonStyle"
-            android:drawableRight="@drawable/arrowforward"
-            android:text="@string/user_agreement" />
-
-    </LinearLayout>
+    <Button
+        android:id="@+id/agreementButton"
+        style="@style/SettingsButtonStyle"
+        android:drawableRight="@drawable/arrowforward"
+        android:text="@string/user_agreement" />
 
 </LinearLayout>

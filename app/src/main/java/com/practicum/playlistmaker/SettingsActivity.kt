@@ -4,24 +4,29 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import android.widget.Switch
+import android.widget.Toolbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 
 class SettingsActivity : AppCompatActivity() {
+    companion object {
+        const val TEXT_KEY = "isDarkTheme"
+        const val TEXT_VALUE = "ThemePrefs"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
-        val returnButton = findViewById<Button>(R.id.settingsReturnButton)
+        val toolbarButton = findViewById<Toolbar>(R.id.toolbarButton)
         val shareButton = findViewById<Button>(R.id.shareButton)
         val supportButton = findViewById<Button>(R.id.supportButton)
         val agreementButton = findViewById<Button>(R.id.agreementButton)
         val switchThemeButton = findViewById<Switch>(R.id.switchThemeButton)
 
-        returnButton.setOnClickListener {
+        toolbarButton.setNavigationOnClickListener {
             val returnIntent = Intent(this, MainActivity::class.java)
             startActivity(returnIntent)
             finish()
@@ -64,14 +69,14 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun getSaveThemeState(): Boolean {
-        val sharedPreferences = getSharedPreferences("ThemePrefs", Context.MODE_PRIVATE)
-        return sharedPreferences.getBoolean("isDarkTheme", false)
+        val sharedPreferences = getSharedPreferences(TEXT_VALUE, Context.MODE_PRIVATE)
+        return sharedPreferences.getBoolean(TEXT_KEY, false)
     }
 
     private fun saveThemeState(isDarkTheme: Boolean) {
-        val sharedPreferences = getSharedPreferences("ThemePrefs", Context.MODE_PRIVATE)
+        val sharedPreferences = getSharedPreferences(TEXT_VALUE, Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
-        editor.putBoolean("isDarkTheme", isDarkTheme)
+        editor.putBoolean(TEXT_KEY, isDarkTheme)
         editor.apply()
     }
 }
