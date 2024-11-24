@@ -20,7 +20,7 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
-        val toolbarButton = findViewById<Toolbar>(R.id.toolbarButton)
+        val toolbarButton = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbarButton)
         val shareButton = findViewById<Button>(R.id.shareButton)
         val supportButton = findViewById<Button>(R.id.supportButton)
         val agreementButton = findViewById<Button>(R.id.agreementButton)

@@ -1,7 +1,7 @@
 <resources>
 
     <style name="ToolbarStyle" parent="Widget.MaterialComponents.Toolbar.Surface">
-        <item name="android:background">@color/colorPrimary</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
         <item name="contentInsetStartWithNavigation">0dp</item>
         <item name="titleMarginStart">12dp</item>
         <item name="navigationIcon">@drawable/arrowback_black</item>
