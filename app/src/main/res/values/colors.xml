@@ -11,4 +11,12 @@
     <color name="light_blue">#9FBBF3</color>
     <color name="grey">#E6E8EB</color>
     <color name="light_grey">#AEAFB4</color>
+
+    <color name="less_then_minus_20">#0000FF</color>
+    <color name="minus_20_to_minus_15">#3636FF</color>
+    <color name="minus_14_to_minus_10">#42AAFF</color>
+    <color name="minus_9_to_plus_9">#FFFFFFFF</color>
+    <color name="plus_10_to_plus_14">#ffff00</color>
+    <color name="plus_15_to_plus_20">#ffa500</color>
+    <color name="more_then_plus_20">#ff4d00</color>
 </resources>

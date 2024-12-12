@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import android.widget.Switch
-import android.widget.Toolbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 

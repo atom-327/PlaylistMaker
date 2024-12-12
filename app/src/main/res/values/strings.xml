@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">Playlist Maker</string>
     <string name="search">Поиск</string>
     <string name="media">Медиатека</string>
@@ -11,4 +11,5 @@
     <string name="messageToSupport">Спасибо разработчикам и разработчицам за крутое приложение!</string>
     <string name="messageToShareApp">https://practicum.yandex.ru/profile/android-developer-plus/</string>
     <string name="agreementLink">https://yandex.ru/legal/practicum_offer/</string>
+    <string name="trackInfo">%1$s • %2$s</string>
 </resources>
