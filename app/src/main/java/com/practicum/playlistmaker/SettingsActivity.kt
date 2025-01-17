@@ -5,9 +5,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
-import android.widget.Switch
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.widget.SwitchCompat
 
 class SettingsActivity : AppCompatActivity() {
     companion object {
@@ -23,7 +23,7 @@ class SettingsActivity : AppCompatActivity() {
         val shareButton = findViewById<Button>(R.id.shareButton)
         val supportButton = findViewById<Button>(R.id.supportButton)
         val agreementButton = findViewById<Button>(R.id.agreementButton)
-        val switchThemeButton = findViewById<Switch>(R.id.switchThemeButton)
+        val switchThemeButton = findViewById<SwitchCompat>(R.id.switchThemeButton)
 
         toolbarButton.setNavigationOnClickListener {
             val returnIntent = Intent(this, MainActivity::class.java)

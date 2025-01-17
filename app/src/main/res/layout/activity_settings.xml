@@ -16,9 +16,9 @@
 
     </androidx.appcompat.widget.Toolbar>
 
-    <Switch
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/switchThemeButton"
-        style="@style/SettingsButtonStyle"
+        style="@style/SwitchButtonStyle"
         android:layout_gravity="center_vertical"
         android:text="@string/dark_theme" />
 
