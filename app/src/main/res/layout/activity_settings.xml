@@ -16,28 +16,28 @@
 
     </androidx.appcompat.widget.Toolbar>
 
-    <Switch
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/switchThemeButton"
-        style="@style/SettingsButtonStyle"
+        style="@style/SwitchButtonStyle"
         android:layout_gravity="center_vertical"
         android:text="@string/dark_theme" />
 
     <Button
         android:id="@+id/shareButton"
         style="@style/SettingsButtonStyle"
-        android:drawableRight="@drawable/toshare"
+        android:drawableEnd="@drawable/toshare"
         android:text="@string/share_app" />
 
     <Button
         android:id="@+id/supportButton"
         style="@style/SettingsButtonStyle"
-        android:drawableRight="@drawable/support"
+        android:drawableEnd="@drawable/support"
         android:text="@string/text_to_support" />
 
     <Button
         android:id="@+id/agreementButton"
         style="@style/SettingsButtonStyle"
-        android:drawableRight="@drawable/arrowforward"
+        android:drawableEnd="@drawable/arrowforward"
         android:text="@string/user_agreement" />
 
 </LinearLayout>
