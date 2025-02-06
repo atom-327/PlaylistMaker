@@ -8,11 +8,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class TrackListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    private val trackIcon: ImageView = itemView.findViewById<ImageView>(R.id.trackIcon)
-    private val trackName: TextView = itemView.findViewById<TextView>(R.id.trackName)
-    private val trackInfo: TextView = itemView.findViewById<TextView>(R.id.trackInfo)
+    private val trackIcon: ImageView = itemView.findViewById(R.id.trackIcon)
+    private val trackName: TextView = itemView.findViewById(R.id.trackName)
+    private val trackInfo: TextView = itemView.findViewById(R.id.trackInfo)
 
     fun bind(item: Track) {
         Glide.with(itemView).load(item.artworkUrl100).placeholder(R.drawable.track_icon_placeholder)
@@ -25,6 +27,10 @@ class TrackListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             ).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(trackIcon)
         trackName.text = item.trackName
         trackInfo.text =
-            itemView.context.getString(R.string.trackInfo, item.artistName, item.trackTime)
+            itemView.context.getString(
+                R.string.trackInfo,
+                item.artistName,
+                SimpleDateFormat("mm:ss", Locale.getDefault()).format(item.trackTimeMillis.toLong())
+            )
     }
 }
