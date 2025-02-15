@@ -3,6 +3,7 @@
     <string name="search">Поиск</string>
     <string name="media">Медиатека</string>
     <string name="settings">Настройки</string>
+    <string name="update">Обновить</string>
     <string name="dark_theme">Темная тема</string>
     <string name="share_app">Поделиться приложением</string>
     <string name="text_to_support">Написать в поддержку</string>
@@ -12,4 +13,6 @@
     <string name="messageToShareApp">https://practicum.yandex.ru/profile/android-developer-plus/</string>
     <string name="agreementLink">https://yandex.ru/legal/practicum_offer/</string>
     <string name="trackInfo">%1$s • %2$s</string>
+    <string name="something_went_wrong">Проблемы со связью\n\nЗагрузка не удалась. Проверьте подключение к интернету</string>
+    <string name="nothing_found">Ничего не нашлось</string>
 </resources>
