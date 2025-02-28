@@ -5,6 +5,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 
 class TrackListAdapter : RecyclerView.Adapter<TrackListViewHolder>() {
+    companion object {
+        const val SHARED_PREF = "ThemePrefs"
+        const val TRACK_ID = "TRACK_ID"
+    }
 
     var tracks = ArrayList<Track>()
 
@@ -15,7 +19,12 @@ class TrackListAdapter : RecyclerView.Adapter<TrackListViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: TrackListViewHolder, position: Int) {
-        holder.bind(tracks[position])
+        val item = tracks[position]
+        holder.bind(item)
+        holder.itemView.setOnClickListener {
+            val searchActivity = SearchActivity()
+            searchActivity.addTrack(item)
+        }
     }
 
     override fun getItemCount(): Int {

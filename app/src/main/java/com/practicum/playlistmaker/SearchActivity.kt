@@ -2,6 +2,7 @@ package com.practicum.playlistmaker
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -18,6 +19,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -31,8 +33,8 @@ class SearchActivity : AppCompatActivity() {
         Retrofit.Builder().baseUrl(iTunesBaseUrl).addConverterFactory(GsonConverterFactory.create())
             .build()
     private val itunesService = retrofit.create(ITunesAPI::class.java)
-    private val tracks = ArrayList<Track>()
-    private val adapter = TrackListAdapter()
+    private var tracks = ArrayList<Track>()
+    private val tracksAdapter = TrackListAdapter()
 
     private lateinit var toolbarButton: Toolbar
     private lateinit var inputEditText: EditText
@@ -43,7 +45,16 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var placeholderText: TextView
     private lateinit var updateButton: Button
 
+    private val storyTracksAdapter = TrackListAdapter()
+    private val storyTracks = ArrayList<Track>()
+    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var storyPlaceholder: LinearLayout
+    private lateinit var storyTrackList: RecyclerView
+    private lateinit var listener: SharedPreferences.OnSharedPreferenceChangeListener
+
     companion object {
+        const val SHARED_PREF = "ThemePrefs"
+        const val TRACK_ID = "TRACK_ID"
         const val TEXT_KEY = "TEXT_KEY"
         const val TEXT_VALUE = ""
     }
@@ -51,6 +62,8 @@ class SearchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
+
+        sharedPreferences = getSharedPreferences(SHARED_PREF, MODE_PRIVATE)
 
         toolbarButton = findViewById(R.id.toolbarButton)
         inputEditText = findViewById(R.id.searchEditText)
@@ -61,12 +74,21 @@ class SearchActivity : AppCompatActivity() {
         placeholderText = findViewById(R.id.placeholderText)
         updateButton = findViewById(R.id.updateButton)
 
+        storyPlaceholder = findViewById(R.id.storyTracks)
+        storyTrackList = findViewById(R.id.storyTrackList)
+
         updateButton.visibility = View.GONE
 
-        adapter.tracks = tracks
+        tracksAdapter.tracks = tracks
 
         trackList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        trackList.adapter = adapter
+        trackList.adapter = tracksAdapter
+
+        storyTracksAdapter.tracks = storyTracks
+
+        storyTrackList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        storyTrackList.adapter = storyTracksAdapter
 
         if (savedInstanceState != null) {
             editTextValue = savedInstanceState.getString(TEXT_KEY, TEXT_VALUE)
@@ -78,6 +100,11 @@ class SearchActivity : AppCompatActivity() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (inputEditText.hasFocus() && s?.isEmpty() == true) {
+                    storyPlaceholder.visibility = View.VISIBLE
+                } else {
+                    storyPlaceholder.visibility = View.GONE
+                }
                 clearButton.isVisible = !s.isNullOrEmpty()
                 println(s.toString())
                 editTextValue = s.toString()
@@ -111,6 +138,31 @@ class SearchActivity : AppCompatActivity() {
         updateButton.setOnClickListener {
             search()
         }
+
+
+        listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == TRACK_ID) {
+                val track = sharedPreferences?.getString(TRACK_ID, null)
+                if (track != null) {
+                    storyTracksAdapter.tracks.add(0, createTrackFromJson(track))
+                    storyTracksAdapter.notifyItemInserted(0)
+                }
+            }
+        }
+
+        sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
+    }
+
+    fun addTrack(track: Track) {
+        sharedPreferences.edit().putString(TRACK_ID, createJsonFromTrack(track)).apply()
+    }
+
+    private fun createJsonFromTrack(track: Track): String {
+        return Gson().toJson(track)
+    }
+
+    private fun createTrackFromJson(json: String): Track {
+        return Gson().fromJson(json, Track::class.java)
     }
 
     private fun search() {
@@ -123,7 +175,7 @@ class SearchActivity : AppCompatActivity() {
                         tracks.clear()
                         if (response.body()?.results?.isNotEmpty() == true) {
                             tracks.addAll(response.body()?.results!!)
-                            adapter.notifyDataSetChanged()
+                            tracksAdapter.notifyDataSetChanged()
                             showMessage("")
                         } else {
                             showMessage(getString(R.string.nothing_found))
@@ -141,7 +193,7 @@ class SearchActivity : AppCompatActivity() {
         if (text.isNotEmpty()) {
             placeholderMessage.visibility = View.VISIBLE
             tracks.clear()
-            adapter.notifyDataSetChanged()
+            tracksAdapter.notifyDataSetChanged()
             placeholderText.text = text
             if (text == getString(R.string.something_went_wrong)) {
                 placeholderImage.setImageResource(R.drawable.something_went_wrong)

@@ -80,5 +80,34 @@
                 style="@style/UpdateButton"
                 android:text="@string/update" />
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/storyTracks"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/PlaceholderText"
+                android:layout_marginHorizontal="@dimen/_16dp"
+                android:layout_marginTop="42dp"
+                android:text="@string/story_tracks" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/storyTrackList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="3"
+                tools:listitem="@layout/track_item">
+
+            </androidx.recyclerview.widget.RecyclerView>
+
+            <Button
+                android:id="@+id/clearStoryTracksButton"
+                style="@style/UpdateButton"
+                android:text="@string/clear_story" />
+        </LinearLayout>
     </FrameLayout>
 </LinearLayout>

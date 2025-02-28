@@ -102,10 +102,10 @@
     </style>
 
     <style name="UpdateButton">
-        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">36dp</item>
+        <item name="android:layout_gravity">center_horizontal</item>
         <item name="android:layout_marginTop">24dp</item>
-        <item name="android:layout_marginHorizontal">135dp</item>
         <item name="android:backgroundTint">@color/white</item>
         <item name="android:fontFamily">@font/ys_display_medium</item>
         <item name="android:textAllCaps">false</item>

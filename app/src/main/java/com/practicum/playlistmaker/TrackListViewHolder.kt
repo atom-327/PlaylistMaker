@@ -26,11 +26,10 @@ class TrackListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
                 )
             ).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(trackIcon)
         trackName.text = item.trackName
-        trackInfo.text =
-            itemView.context.getString(
-                R.string.trackInfo,
-                item.artistName,
-                SimpleDateFormat("mm:ss", Locale.getDefault()).format(item.trackTimeMillis.toLong())
-            )
+        trackInfo.text = itemView.context.getString(
+            R.string.trackInfo,
+            item.artistName,
+            SimpleDateFormat("mm:ss", Locale.getDefault()).format(item.trackTimeMillis.toLong())
+        )
     }
 }
