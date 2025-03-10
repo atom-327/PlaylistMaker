@@ -84,7 +84,7 @@
         <LinearLayout
             android:id="@+id/storyTracks"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <TextView
@@ -96,7 +96,8 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/storyTrackList"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/_0dp"
+                android:layout_weight="1"
                 android:orientation="vertical"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:itemCount="3"

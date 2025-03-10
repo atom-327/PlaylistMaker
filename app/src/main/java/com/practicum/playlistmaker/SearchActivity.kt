@@ -19,7 +19,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
+import com.practicum.playlistmaker.SettingsActivity.Companion.SHARED_PREF
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -33,8 +33,12 @@ class SearchActivity : AppCompatActivity() {
         Retrofit.Builder().baseUrl(iTunesBaseUrl).addConverterFactory(GsonConverterFactory.create())
             .build()
     private val itunesService = retrofit.create(ITunesAPI::class.java)
-    private var tracks = ArrayList<Track>()
-    private val tracksAdapter = TrackListAdapter()
+    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var listener: SharedPreferences.OnSharedPreferenceChangeListener
+    private val tracks = ArrayList<Track>()
+    private val storyTracks = ArrayList<Track>()
+    private lateinit var tracksAdapter: TrackListAdapter
+    private lateinit var storyTracksAdapter: TrackListAdapter
 
     private lateinit var toolbarButton: Toolbar
     private lateinit var inputEditText: EditText
@@ -44,16 +48,11 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var placeholderImage: ImageView
     private lateinit var placeholderText: TextView
     private lateinit var updateButton: Button
-
-    private val storyTracksAdapter = TrackListAdapter()
-    private val storyTracks = ArrayList<Track>()
-    private lateinit var sharedPreferences: SharedPreferences
     private lateinit var storyPlaceholder: LinearLayout
     private lateinit var storyTrackList: RecyclerView
-    private lateinit var listener: SharedPreferences.OnSharedPreferenceChangeListener
+    private lateinit var clearStoryTracksButton: Button
 
     companion object {
-        const val SHARED_PREF = "ThemePrefs"
         const val TRACK_ID = "TRACK_ID"
         const val TEXT_KEY = "TEXT_KEY"
         const val TEXT_VALUE = ""
@@ -64,6 +63,7 @@ class SearchActivity : AppCompatActivity() {
         setContentView(R.layout.activity_search)
 
         sharedPreferences = getSharedPreferences(SHARED_PREF, MODE_PRIVATE)
+        val searchHistory = SearchHistory(sharedPreferences)
 
         toolbarButton = findViewById(R.id.toolbarButton)
         inputEditText = findViewById(R.id.searchEditText)
@@ -73,19 +73,22 @@ class SearchActivity : AppCompatActivity() {
         placeholderImage = findViewById(R.id.placeholderImage)
         placeholderText = findViewById(R.id.placeholderText)
         updateButton = findViewById(R.id.updateButton)
-
         storyPlaceholder = findViewById(R.id.storyTracks)
         storyTrackList = findViewById(R.id.storyTrackList)
+        clearStoryTracksButton = findViewById(R.id.clearStoryTracksButton)
 
         updateButton.visibility = View.GONE
+        storyPlaceholder.visibility = View.GONE
 
-        tracksAdapter.tracks = tracks
-
+        tracksAdapter = TrackListAdapter(tracks) { track ->
+            searchHistory.addTrack(storyTracks, track)
+        }
         trackList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         trackList.adapter = tracksAdapter
 
-        storyTracksAdapter.tracks = storyTracks
-
+        storyTracksAdapter = TrackListAdapter(storyTracks) { track ->
+            searchHistory.addTrack(storyTracks, track)
+        }
         storyTrackList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         storyTrackList.adapter = storyTracksAdapter
@@ -100,20 +103,36 @@ class SearchActivity : AppCompatActivity() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if (inputEditText.hasFocus() && s?.isEmpty() == true) {
+                clearButton.isVisible = !s.isNullOrEmpty()
+                println(s.toString())
+                editTextValue = s.toString()
+                if (inputEditText.hasFocus() && s?.isEmpty() == true && storyTracks.isNotEmpty()) {
                     storyPlaceholder.visibility = View.VISIBLE
                 } else {
                     storyPlaceholder.visibility = View.GONE
                 }
-                clearButton.isVisible = !s.isNullOrEmpty()
-                println(s.toString())
-                editTextValue = s.toString()
             }
 
             override fun afterTextChanged(s: Editable?) {
             }
         }
         inputEditText.addTextChangedListener(simpleTextWatcher)
+
+        inputEditText.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus && inputEditText.text.isEmpty()) {
+                searchHistory.loadTracks(storyTracks)
+                storyTracksAdapter.notifyDataSetChanged()
+                if (storyTracks.size != 0) {
+                    storyPlaceholder.visibility = View.VISIBLE
+                }
+            }
+        }
+
+        clearStoryTracksButton.setOnClickListener {
+            searchHistory.clearHistory(storyTracks)
+            storyTracksAdapter.notifyDataSetChanged()
+            storyPlaceholder.visibility = View.GONE
+        }
 
         inputEditText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
@@ -127,6 +146,7 @@ class SearchActivity : AppCompatActivity() {
             inputEditText.setText("")
             hideSoftKeyboard(it)
             tracks.clear()
+            tracksAdapter.notifyDataSetChanged()
         }
 
         toolbarButton.setNavigationOnClickListener {
@@ -139,30 +159,13 @@ class SearchActivity : AppCompatActivity() {
             search()
         }
 
-
         listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             if (key == TRACK_ID) {
-                val track = sharedPreferences?.getString(TRACK_ID, null)
-                if (track != null) {
-                    storyTracksAdapter.tracks.add(0, createTrackFromJson(track))
-                    storyTracksAdapter.notifyItemInserted(0)
-                }
+                searchHistory.loadTracks(storyTracks)
+                storyTracksAdapter.notifyDataSetChanged()
             }
         }
-
         sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
-    }
-
-    fun addTrack(track: Track) {
-        sharedPreferences.edit().putString(TRACK_ID, createJsonFromTrack(track)).apply()
-    }
-
-    private fun createJsonFromTrack(track: Track): String {
-        return Gson().toJson(track)
-    }
-
-    private fun createTrackFromJson(json: String): Track {
-        return Gson().fromJson(json, Track::class.java)
     }
 
     private fun search() {
