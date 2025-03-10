@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 
 class TrackListAdapter(
-    var tracks: ArrayList<Track>,
+    private var tracks: MutableList<Track>,
     private val onTrackClick: (Track) -> Unit
 ) : RecyclerView.Adapter<TrackListViewHolder>() {
 

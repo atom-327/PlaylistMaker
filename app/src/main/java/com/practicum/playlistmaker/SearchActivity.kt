@@ -35,8 +35,8 @@ class SearchActivity : AppCompatActivity() {
     private val itunesService = retrofit.create(ITunesAPI::class.java)
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var listener: SharedPreferences.OnSharedPreferenceChangeListener
-    private val tracks = ArrayList<Track>()
-    private val storyTracks = ArrayList<Track>()
+    private val tracks = mutableListOf<Track>()
+    private val storyTracks = mutableListOf<Track>()
     private lateinit var tracksAdapter: TrackListAdapter
     private lateinit var storyTracksAdapter: TrackListAdapter
 

@@ -7,7 +7,13 @@ import com.practicum.playlistmaker.SearchActivity.Companion.TRACK_ID
 
 class SearchHistory(private val sharedPreferences: SharedPreferences) : Application() {
 
-    fun loadTracks(storyTracks: ArrayList<Track>) {
+    companion object {
+        const val STORY_SIZE = 10
+    }
+
+    private val gson = Gson()
+
+    fun loadTracks(storyTracks: MutableList<Track>) {
         val track = sharedPreferences.getString(TRACK_ID, null)
         if (track != null) {
             storyTracks.clear()
@@ -15,13 +21,13 @@ class SearchHistory(private val sharedPreferences: SharedPreferences) : Applicat
         }
     }
 
-    fun addTrack(storyTracks: ArrayList<Track>, track: Track) {
+    fun addTrack(storyTracks: MutableList<Track>, track: Track) {
         val existingTrack = storyTracks.find { it.trackId == track.trackId }
         if (existingTrack != null) {
             storyTracks.remove(existingTrack)
         }
         storyTracks.add(0, track)
-        if (storyTracks.size > 10) {
+        if (storyTracks.size > STORY_SIZE) {
             storyTracks.removeAt(storyTracks.size - 1)
         }
         val array = storyTracks.toTypedArray()
@@ -29,16 +35,16 @@ class SearchHistory(private val sharedPreferences: SharedPreferences) : Applicat
             .apply()
     }
 
-    fun clearHistory(storyTracks: ArrayList<Track>) {
+    fun clearHistory(storyTracks: MutableList<Track>) {
         sharedPreferences.edit().remove(TRACK_ID).apply()
         storyTracks.clear()
     }
 
     private fun createJsonFromTracks(tracks: Array<Track>): String {
-        return Gson().toJson(tracks)
+        return gson.toJson(tracks)
     }
 
     private fun createTracksFromJson(json: String): Array<Track> {
-        return Gson().fromJson(json, Array<Track>::class.java)
+        return gson.fromJson(json, Array<Track>::class.java)
     }
 }

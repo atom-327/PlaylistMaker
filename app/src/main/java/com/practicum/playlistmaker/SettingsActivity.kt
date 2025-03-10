@@ -54,11 +54,9 @@ class SettingsActivity : AppCompatActivity() {
             startActivity(agreementIntent)
         }
 
-        val sharedPreferences = getSharedPreferences(SHARED_PREF, MODE_PRIVATE)
-        switchThemeButton.isChecked = sharedPreferences.getBoolean(TEXT_KEY, false)
+        switchThemeButton.isChecked = (applicationContext as App).getAppTheme()
         switchThemeButton.setOnCheckedChangeListener { _, checked ->
             (applicationContext as App).switchTheme(checked)
-            sharedPreferences.edit().putBoolean(TEXT_KEY, checked).apply()
         }
     }
 }
