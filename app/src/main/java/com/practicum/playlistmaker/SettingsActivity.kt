@@ -1,18 +1,16 @@
 package com.practicum.playlistmaker
 
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SwitchCompat
 
 class SettingsActivity : AppCompatActivity() {
     companion object {
+        const val SHARED_PREF = "ThemePrefs"
         const val TEXT_KEY = "isDarkTheme"
-        const val TEXT_VALUE = "ThemePrefs"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,26 +54,9 @@ class SettingsActivity : AppCompatActivity() {
             startActivity(agreementIntent)
         }
 
-        switchThemeButton.isChecked = getSaveThemeState()
-        switchThemeButton.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            } else {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-            }
-            saveThemeState(isChecked)
+        switchThemeButton.isChecked = (applicationContext as App).getAppTheme()
+        switchThemeButton.setOnCheckedChangeListener { _, checked ->
+            (applicationContext as App).switchTheme(checked)
         }
-    }
-
-    private fun getSaveThemeState(): Boolean {
-        val sharedPreferences = getSharedPreferences(TEXT_VALUE, Context.MODE_PRIVATE)
-        return sharedPreferences.getBoolean(TEXT_KEY, false)
-    }
-
-    private fun saveThemeState(isDarkTheme: Boolean) {
-        val sharedPreferences = getSharedPreferences(TEXT_VALUE, Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putBoolean(TEXT_KEY, isDarkTheme)
-        editor.apply()
     }
 }
