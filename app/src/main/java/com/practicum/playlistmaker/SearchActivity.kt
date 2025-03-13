@@ -82,12 +82,16 @@ class SearchActivity : AppCompatActivity() {
 
         tracksAdapter = TrackListAdapter(tracks) { track ->
             searchHistory.addTrack(storyTracks, track)
+            val audioPlayerIntent = Intent(this, AudioPlayer::class.java)
+            startActivity(audioPlayerIntent)
         }
         trackList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         trackList.adapter = tracksAdapter
 
         storyTracksAdapter = TrackListAdapter(storyTracks) { track ->
             searchHistory.addTrack(storyTracks, track)
+            val audioPlayerIntent = Intent(this, AudioPlayer::class.java)
+            startActivity(audioPlayerIntent)
         }
         storyTrackList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
