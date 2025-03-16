@@ -111,6 +111,9 @@ class SearchActivity : AppCompatActivity() {
                 println(s.toString())
                 editTextValue = s.toString()
                 if (inputEditText.hasFocus() && s?.isEmpty() == true && storyTracks.isNotEmpty()) {
+                    tracks.clear()
+                    tracksAdapter.notifyDataSetChanged()
+                    placeholderMessage.visibility = View.GONE
                     storyPlaceholder.visibility = View.VISIBLE
                 } else {
                     storyPlaceholder.visibility = View.GONE

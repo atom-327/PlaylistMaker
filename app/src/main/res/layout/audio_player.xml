@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -36,11 +37,14 @@
             android:orientation="vertical"
             app:layout_constraintGuide_end="@dimen/_16dp" />
 
-        <ImageButton
+        <androidx.appcompat.widget.Toolbar
             android:id="@+id/searchButton"
-            style="@style/BackButton"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:theme="@style/Theme.Toolbar"
+            app:titleTextAppearance="@style/TopTextStyle">
+
+        </androidx.appcompat.widget.Toolbar>
 
         <ImageView
             android:id="@+id/trackIcon"
@@ -59,6 +63,7 @@
             android:layout_marginTop="24dp"
             android:textSize="@dimen/_22sp"
             app:layout_constrainedWidth="true"
+            app:layout_constraintEnd_toStartOf="@+id/rightGL"
             app:layout_constraintStart_toStartOf="@+id/leftGL"
             app:layout_constraintTop_toBottomOf="@+id/trackIcon" />
 
@@ -68,6 +73,7 @@
             android:layout_marginTop="@dimen/_12dp"
             android:textSize="14sp"
             app:layout_constrainedWidth="true"
+            app:layout_constraintEnd_toStartOf="@+id/rightGL"
             app:layout_constraintStart_toStartOf="@+id/leftGL"
             app:layout_constraintTop_toBottomOf="@+id/trackName" />
 
@@ -102,6 +108,7 @@
         <TextView
             android:id="@+id/trackTimeToEnd"
             style="@style/MainTrackInfo"
+            android:layout_width="wrap_content"
             android:layout_marginTop="@dimen/_4dp"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="@+id/rightGL"
@@ -141,9 +148,14 @@
         <TextView
             android:id="@+id/trackAlbumInfo"
             style="@style/FunctionTrackText"
+            android:layout_width="@dimen/_0dp"
+            android:ellipsize="end"
+            android:gravity="end"
+            android:maxLines="1"
             app:layout_constrainedWidth="true"
             app:layout_constraintBaseline_toBaselineOf="@id/trackAlbum"
-            app:layout_constraintEnd_toEndOf="@+id/rightGL1" />
+            app:layout_constraintEnd_toEndOf="@+id/rightGL1"
+            app:layout_constraintStart_toEndOf="@id/trackAlbum" />
 
         <TextView
             android:id="@+id/trackYear"

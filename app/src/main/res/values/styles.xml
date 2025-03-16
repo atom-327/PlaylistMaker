@@ -131,25 +131,18 @@
         <item name="cornerRadius">54dp</item>
     </style>
 
-    <style name="BackButton">
-        <item name="android:layout_width">@dimen/_48dp</item>
-        <item name="android:layout_height">@dimen/_48dp</item>
-        <item name="android:layout_marginStart">@dimen/_4dp</item>
-        <item name="android:layout_marginTop">@dimen/_4dp</item>
-        <item name="android:background">@color/white</item>
-        <item name="android:src">@drawable/arrowback_black</item>
-    </style>
-
     <style name="MainTrackInfo">
-        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_width">@dimen/_0dp</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLines">1</item>
         <item name="android:fontFamily">@font/ys_display_medium</item>
         <item name="android:textColor">@color/black</item>
     </style>
 
     <style name="PlayTrackButton">
         <item name="android:background">@drawable/play_track_button</item>
-        <item name="android:src">@drawable/to_stop_track</item>
+        <item name="android:src">@drawable/to_play_track</item>
     </style>
 
     <style name="FunctionTrackButton">

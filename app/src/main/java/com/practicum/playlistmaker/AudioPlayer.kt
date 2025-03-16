@@ -15,7 +15,6 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class AudioPlayer : AppCompatActivity() {
-    private lateinit var searchButton: ImageButton
     private lateinit var trackIcon: ImageView
     private lateinit var trackName: TextView
     private lateinit var artistName: TextView
@@ -30,7 +29,7 @@ class AudioPlayer : AppCompatActivity() {
     private val dateFormat by lazy { SimpleDateFormat("mm:ss", Locale.getDefault()) }
 
     private lateinit var track: Track
-    private var isTrackStopped = false
+    private var isTrackStopped = true
     private var isTrackLicked = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,7 +40,7 @@ class AudioPlayer : AppCompatActivity() {
         val searchHistory = SearchHistory(sharedPreferences)
         track = searchHistory.getListeningTrack()!!
 
-        searchButton = findViewById(R.id.searchButton)
+        val searchButton = findViewById<androidx.appcompat.widget.Toolbar>(R.id.searchButton)
         trackIcon = findViewById(R.id.trackIcon)
         trackName = findViewById(R.id.trackName)
         artistName = findViewById(R.id.artistName)
@@ -57,7 +56,9 @@ class AudioPlayer : AppCompatActivity() {
         Glide.with(this).load(track.getCoverArtwork())
             .placeholder(R.drawable.track_icon_placeholder).centerCrop().transform(
                 RoundedCorners(
-                    8
+                    TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP, 8F, resources.displayMetrics
+                    ).toInt()
                 )
             )
             .diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(trackIcon)
@@ -70,7 +71,7 @@ class AudioPlayer : AppCompatActivity() {
         trackGenre.text = track.primaryGenreName
         trackCountry.text = track.country
 
-        searchButton.setOnClickListener() {
+        searchButton.setNavigationOnClickListener {
             val returnIntent = Intent(this, SearchActivity::class.java)
             startActivity(returnIntent)
             finish()
