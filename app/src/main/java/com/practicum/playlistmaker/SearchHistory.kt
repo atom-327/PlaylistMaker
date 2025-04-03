@@ -8,7 +8,7 @@ import com.practicum.playlistmaker.SearchActivity.Companion.TRACK_ID
 class SearchHistory(private val sharedPreferences: SharedPreferences) : Application() {
 
     companion object {
-        const val STORY_SIZE = 10
+        private const val STORY_SIZE = 10
     }
 
     private val gson = Gson()
@@ -38,6 +38,14 @@ class SearchHistory(private val sharedPreferences: SharedPreferences) : Applicat
     fun clearHistory(storyTracks: MutableList<Track>) {
         sharedPreferences.edit().remove(TRACK_ID).apply()
         storyTracks.clear()
+    }
+
+    fun getListeningTrack(): Track? {
+        val trackStr = sharedPreferences.getString(TRACK_ID, null)
+        if (trackStr != null) {
+            val tracks = createTracksFromJson(trackStr)
+            return tracks[0]
+        } else return null
     }
 
     private fun createJsonFromTracks(tracks: Array<Track>): String {

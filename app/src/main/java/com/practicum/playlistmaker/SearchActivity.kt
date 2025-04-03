@@ -82,12 +82,16 @@ class SearchActivity : AppCompatActivity() {
 
         tracksAdapter = TrackListAdapter(tracks) { track ->
             searchHistory.addTrack(storyTracks, track)
+            val audioPlayerIntent = Intent(this, AudioPlayer::class.java)
+            startActivity(audioPlayerIntent)
         }
         trackList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         trackList.adapter = tracksAdapter
 
         storyTracksAdapter = TrackListAdapter(storyTracks) { track ->
             searchHistory.addTrack(storyTracks, track)
+            val audioPlayerIntent = Intent(this, AudioPlayer::class.java)
+            startActivity(audioPlayerIntent)
         }
         storyTrackList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
@@ -107,6 +111,9 @@ class SearchActivity : AppCompatActivity() {
                 println(s.toString())
                 editTextValue = s.toString()
                 if (inputEditText.hasFocus() && s?.isEmpty() == true && storyTracks.isNotEmpty()) {
+                    tracks.clear()
+                    tracksAdapter.notifyDataSetChanged()
+                    placeholderMessage.visibility = View.GONE
                     storyPlaceholder.visibility = View.VISIBLE
                 } else {
                     storyPlaceholder.visibility = View.GONE
