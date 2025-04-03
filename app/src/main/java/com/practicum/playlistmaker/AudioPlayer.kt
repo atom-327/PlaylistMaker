@@ -1,7 +1,10 @@
 package com.practicum.playlistmaker
 
 import android.content.Intent
+import android.media.MediaPlayer
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.TypedValue
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -15,6 +18,22 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class AudioPlayer : AppCompatActivity() {
+    companion object {
+        private const val STATE_DEFAULT = 0
+        private const val STATE_PREPARED = 1
+        private const val STATE_PLAYING = 2
+        private const val STATE_PAUSED = 3
+        private const val REFRESH_SECONDS_VALUE_MILLIS = 300L
+    }
+
+    private var mediaPlayer = MediaPlayer()
+    private var playerState = STATE_DEFAULT
+    private var mainThreadHandler: Handler? = null
+    private val timerRunnable: Runnable = Runnable { refreshTrackTimer() }
+    private lateinit var track: Track
+    private var darkTheme: Boolean = false
+    private var isTrackLicked = false
+
     private lateinit var trackIcon: ImageView
     private lateinit var trackName: TextView
     private lateinit var artistName: TextView
@@ -28,16 +47,14 @@ class AudioPlayer : AppCompatActivity() {
     private lateinit var trackCountry: TextView
     private val dateFormat by lazy { SimpleDateFormat("mm:ss", Locale.getDefault()) }
 
-    private lateinit var track: Track
-    private var isTrackStopped = true
-    private var isTrackLicked = false
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.audio_player)
 
+        mainThreadHandler = Handler(Looper.getMainLooper())
         val sharedPreferences = getSharedPreferences(SHARED_PREF, MODE_PRIVATE)
         val searchHistory = SearchHistory(sharedPreferences)
+        darkTheme = (applicationContext as App).getAppTheme()
         track = searchHistory.getListeningTrack()!!
 
         val searchButton = findViewById<androidx.appcompat.widget.Toolbar>(R.id.searchButton)
@@ -60,11 +77,10 @@ class AudioPlayer : AppCompatActivity() {
                         TypedValue.COMPLEX_UNIT_DIP, 8F, resources.displayMetrics
                     ).toInt()
                 )
-            )
-            .diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(trackIcon)
+            ).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(trackIcon)
         trackName.text = track.trackName
         artistName.text = track.artistName
-        trackTimeToEnd.text = dateFormat.format(track.trackTimeMillis.toLong())
+        trackTimeToEnd.text = dateFormat.format(0L)
         trackTime.text = dateFormat.format(track.trackTimeMillis.toLong())
         trackAlbum.text = track.collectionName
         trackYear.text = track.releaseDate.substringBefore("-")
@@ -77,24 +93,10 @@ class AudioPlayer : AppCompatActivity() {
             finish()
         }
 
-        playTrackButton.setOnClickListener {
-            val darkTheme = (applicationContext as App).getAppTheme()
-            if (isTrackStopped) {
-                if (darkTheme) {
-                    playTrackButton.setImageResource(R.drawable.to_stop_track_dark)
-                } else {
-                    playTrackButton.setImageResource(R.drawable.to_stop_track)
-                }
-                isTrackStopped = false
-            } else {
-                if (darkTheme) {
-                    playTrackButton.setImageResource(R.drawable.to_play_track_dark)
-                } else {
-                    playTrackButton.setImageResource(R.drawable.to_play_track)
-                }
-                isTrackStopped = true
-            }
+        preparePlayer(track.previewUrl)
 
+        playTrackButton.setOnClickListener {
+            playbackControl()
         }
 
         toLikeTrackButton.setOnClickListener {
@@ -105,6 +107,77 @@ class AudioPlayer : AppCompatActivity() {
                 toLikeTrackButton.setImageResource(R.drawable.to_like_track_icon)
                 isTrackLicked = false
             }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        pausePlayer()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mediaPlayer.release()
+        mainThreadHandler?.removeCallbacks(timerRunnable)
+    }
+
+    private fun playbackControl() {
+        when (playerState) {
+            STATE_PLAYING -> {
+                pausePlayer()
+            }
+
+            STATE_PREPARED, STATE_PAUSED -> {
+                startPlayer()
+            }
+        }
+    }
+
+    private fun preparePlayer(trackUrl: String) {
+        mediaPlayer.setDataSource(trackUrl)
+        mediaPlayer.prepareAsync()
+        mediaPlayer.setOnPreparedListener {
+            playTrackButton.isEnabled = true
+            playerState = STATE_PREPARED
+        }
+        mediaPlayer.setOnCompletionListener {
+            if (darkTheme) {
+                playTrackButton.setImageResource(R.drawable.to_play_track_dark)
+            } else {
+                playTrackButton.setImageResource(R.drawable.to_play_track)
+            }
+            playerState = STATE_PREPARED
+            mainThreadHandler?.removeCallbacks(timerRunnable)
+            trackTimeToEnd.text = dateFormat.format(0L)
+        }
+    }
+
+    private fun startPlayer() {
+        mediaPlayer.start()
+        if (darkTheme) {
+            playTrackButton.setImageResource(R.drawable.to_stop_track_dark)
+        } else {
+            playTrackButton.setImageResource(R.drawable.to_stop_track)
+        }
+        playerState = STATE_PLAYING
+        mainThreadHandler?.post(timerRunnable)
+    }
+
+    private fun pausePlayer() {
+        mediaPlayer.pause()
+        mainThreadHandler?.removeCallbacks(timerRunnable)
+        if (darkTheme) {
+            playTrackButton.setImageResource(R.drawable.to_play_track_dark)
+        } else {
+            playTrackButton.setImageResource(R.drawable.to_play_track)
+        }
+        playerState = STATE_PAUSED
+    }
+
+    private fun refreshTrackTimer() {
+        if (playerState == STATE_PLAYING) {
+            trackTimeToEnd.text = dateFormat.format(mediaPlayer.currentPosition)
+            mainThreadHandler?.postDelayed(timerRunnable, REFRESH_SECONDS_VALUE_MILLIS)
         }
     }
 }
