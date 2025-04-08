@@ -4,15 +4,17 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -39,6 +41,9 @@ class SearchActivity : AppCompatActivity() {
     private val storyTracks = mutableListOf<Track>()
     private lateinit var tracksAdapter: TrackListAdapter
     private lateinit var storyTracksAdapter: TrackListAdapter
+    private var isClickAllowed = true
+    private val handler = Handler(Looper.getMainLooper())
+    private val searchRunnable = Runnable { search() }
 
     private lateinit var toolbarButton: Toolbar
     private lateinit var inputEditText: EditText
@@ -51,11 +56,14 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var storyPlaceholder: LinearLayout
     private lateinit var storyTrackList: RecyclerView
     private lateinit var clearStoryTracksButton: Button
+    private lateinit var progressBar: ProgressBar
 
     companion object {
         const val TRACK_ID = "TRACK_ID"
         const val TEXT_KEY = "TEXT_KEY"
         const val TEXT_VALUE = ""
+        private const val CLICK_DEBOUNCE_DELAY = 1_000L
+        private const val SEARCH_DEBOUNCE_DELAY = 2_000L
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,22 +84,27 @@ class SearchActivity : AppCompatActivity() {
         storyPlaceholder = findViewById(R.id.storyTracks)
         storyTrackList = findViewById(R.id.storyTrackList)
         clearStoryTracksButton = findViewById(R.id.clearStoryTracksButton)
+        progressBar = findViewById(R.id.progressBar)
 
         updateButton.visibility = View.GONE
         storyPlaceholder.visibility = View.GONE
 
         tracksAdapter = TrackListAdapter(tracks) { track ->
-            searchHistory.addTrack(storyTracks, track)
-            val audioPlayerIntent = Intent(this, AudioPlayer::class.java)
-            startActivity(audioPlayerIntent)
+            if (clickDebounce()) {
+                searchHistory.addTrack(storyTracks, track)
+                val audioPlayerIntent = Intent(this, AudioPlayer::class.java)
+                startActivity(audioPlayerIntent)
+            }
         }
         trackList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         trackList.adapter = tracksAdapter
 
         storyTracksAdapter = TrackListAdapter(storyTracks) { track ->
-            searchHistory.addTrack(storyTracks, track)
-            val audioPlayerIntent = Intent(this, AudioPlayer::class.java)
-            startActivity(audioPlayerIntent)
+            if (clickDebounce()) {
+                searchHistory.addTrack(storyTracks, track)
+                val audioPlayerIntent = Intent(this, AudioPlayer::class.java)
+                startActivity(audioPlayerIntent)
+            }
         }
         storyTrackList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
@@ -110,6 +123,7 @@ class SearchActivity : AppCompatActivity() {
                 clearButton.isVisible = !s.isNullOrEmpty()
                 println(s.toString())
                 editTextValue = s.toString()
+                searchDebounce()
                 if (inputEditText.hasFocus() && s?.isEmpty() == true && storyTracks.isNotEmpty()) {
                     tracks.clear()
                     tracksAdapter.notifyDataSetChanged()
@@ -141,14 +155,6 @@ class SearchActivity : AppCompatActivity() {
             storyPlaceholder.visibility = View.GONE
         }
 
-        inputEditText.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                search()
-                true
-            }
-            false
-        }
-
         clearButton.setOnClickListener {
             inputEditText.setText("")
             hideSoftKeyboard(it)
@@ -176,27 +182,37 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun search() {
-        itunesService.search(inputEditText.text.toString())
-            .enqueue(object : Callback<ITunesResponse> {
-                override fun onResponse(
-                    call: Call<ITunesResponse>, response: Response<ITunesResponse>
-                ) {
-                    if (response.code() == 200) {
-                        tracks.clear()
-                        if (response.body()?.results?.isNotEmpty() == true) {
-                            tracks.addAll(response.body()?.results!!)
-                            tracksAdapter.notifyDataSetChanged()
-                            showMessage("")
-                        } else {
-                            showMessage(getString(R.string.nothing_found))
-                        }
-                    } else showMessage(getString(R.string.something_went_wrong))
-                }
+        if (inputEditText.text.isNotEmpty()) {
+            trackList.visibility = View.GONE
+            placeholderMessage.visibility = View.GONE
+            storyPlaceholder.visibility = View.GONE
+            progressBar.visibility = View.VISIBLE
 
-                override fun onFailure(call: Call<ITunesResponse>, t: Throwable) {
-                    showMessage(getString(R.string.something_went_wrong))
-                }
-            })
+            itunesService.search(inputEditText.text.toString())
+                .enqueue(object : Callback<ITunesResponse> {
+                    override fun onResponse(
+                        call: Call<ITunesResponse>, response: Response<ITunesResponse>
+                    ) {
+                        progressBar.visibility = View.GONE
+                        if (response.code() == 200) {
+                            tracks.clear()
+                            if (response.body()?.results?.isNotEmpty() == true) {
+                                trackList.visibility = View.VISIBLE
+                                tracks.addAll(response.body()?.results!!)
+                                tracksAdapter.notifyDataSetChanged()
+                                showMessage("")
+                            } else {
+                                showMessage(getString(R.string.nothing_found))
+                            }
+                        } else showMessage(getString(R.string.something_went_wrong))
+                    }
+
+                    override fun onFailure(call: Call<ITunesResponse>, t: Throwable) {
+                        progressBar.visibility = View.GONE
+                        showMessage(getString(R.string.something_went_wrong))
+                    }
+                })
+        }
     }
 
     private fun showMessage(text: String) {
@@ -225,5 +241,19 @@ class SearchActivity : AppCompatActivity() {
     private fun hideSoftKeyboard(view: View) {
         val manager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         manager.hideSoftInputFromWindow(view.windowToken, 0)
+    }
+
+    private fun clickDebounce(): Boolean {
+        val current = isClickAllowed
+        if (isClickAllowed) {
+            isClickAllowed = false
+            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
+        }
+        return current
+    }
+
+    private fun searchDebounce() {
+        handler.removeCallbacks(searchRunnable)
+        handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
     }
 }
