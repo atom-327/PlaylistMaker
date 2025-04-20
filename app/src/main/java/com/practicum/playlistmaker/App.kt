@@ -3,17 +3,21 @@ package com.practicum.playlistmaker
 import android.app.Application
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
-import com.practicum.playlistmaker.SettingsActivity.Companion.TEXT_KEY
-import com.practicum.playlistmaker.SettingsActivity.Companion.SHARED_PREF
 
 class App : Application() {
+
+    companion object {
+        const val TEXT_KEY = "isDarkTheme"
+        const val TRACK_ID = "TRACK_ID"
+    }
 
     private lateinit var sharedPreferences: SharedPreferences
     private var darkTheme = false
 
     override fun onCreate() {
         super.onCreate()
-        sharedPreferences = getSharedPreferences(SHARED_PREF, MODE_PRIVATE)
+        Creator.initApplication(this)
+        sharedPreferences = Creator.createSharedPreferences()
         darkTheme = getAppTheme()
         switchTheme(darkTheme)
     }

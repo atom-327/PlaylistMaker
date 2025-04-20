@@ -1,4 +1,4 @@
-package com.practicum.playlistmaker
+package com.practicum.playlistmaker.ui.tracks
 
 import android.content.Intent
 import android.media.MediaPlayer
@@ -13,7 +13,11 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import com.practicum.playlistmaker.SettingsActivity.Companion.SHARED_PREF
+import com.practicum.playlistmaker.App
+import com.practicum.playlistmaker.Creator
+import com.practicum.playlistmaker.R
+import com.practicum.playlistmaker.domain.impl.SearchHistoryImpl
+import com.practicum.playlistmaker.domain.models.Track
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -52,8 +56,8 @@ class AudioPlayer : AppCompatActivity() {
         setContentView(R.layout.audio_player)
 
         mainThreadHandler = Handler(Looper.getMainLooper())
-        val sharedPreferences = getSharedPreferences(SHARED_PREF, MODE_PRIVATE)
-        val searchHistory = SearchHistory(sharedPreferences)
+        val sharedPreferences = Creator.createSharedPreferences()
+        val searchHistory = SearchHistoryImpl(sharedPreferences)
         darkTheme = (applicationContext as App).getAppTheme()
         track = searchHistory.getListeningTrack()!!
 
@@ -81,7 +85,7 @@ class AudioPlayer : AppCompatActivity() {
         trackName.text = track.trackName
         artistName.text = track.artistName
         trackTimeToEnd.text = dateFormat.format(0L)
-        trackTime.text = dateFormat.format(track.trackTimeMillis.toLong())
+        trackTime.text = track.trackTimeMillis
         trackAlbum.text = track.collectionName
         trackYear.text = track.releaseDate.substringBefore("-")
         trackGenre.text = track.primaryGenreName
