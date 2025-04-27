@@ -26,14 +26,14 @@ import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.domain.api.SearchHistoryInteractor
 import com.practicum.playlistmaker.domain.api.SharedPreferencesRepository
 import com.practicum.playlistmaker.domain.api.TracksInteractor
-import com.practicum.playlistmaker.domain.impl.SearchHistoryImpl.Companion.TRACK_ID
 import com.practicum.playlistmaker.domain.models.Track
 
 class SearchActivity : AppCompatActivity() {
 
     companion object {
-        const val TEXT_KEY = "TEXT_KEY"
-        const val TEXT_VALUE = ""
+        private const val TRACK_ID = "TRACK_ID"
+        private const val TEXT_KEY = "TEXT_KEY"
+        private const val TEXT_VALUE = ""
         private const val CLICK_DEBOUNCE_DELAY = 1_000L
         private const val SEARCH_DEBOUNCE_DELAY = 2_000L
     }
@@ -188,8 +188,8 @@ class SearchActivity : AppCompatActivity() {
             storyPlaceholder.visibility = View.GONE
             progressBar.visibility = View.VISIBLE
 
-            tracksInteractor.searchTracks(
-                inputEditText.text.toString(), object : TracksInteractor.TracksConsumer {
+            tracksInteractor.searchTracks(inputEditText.text.toString(),
+                object : TracksInteractor.TracksConsumer {
                     override fun consume(foundTracks: List<Track>) {
                         handler.post {
                             progressBar.visibility = View.GONE

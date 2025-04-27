@@ -10,8 +10,8 @@ import com.practicum.playlistmaker.domain.api.SharedPreferencesRepository
 class App : Application() {
 
     companion object {
-        const val IS_FIRST_RUN = "is_first_run"
-        const val TEXT_KEY = "isDarkTheme"
+        private const val IS_FIRST_RUN = "is_first_run"
+        private const val TEXT_KEY = "isDarkTheme"
     }
 
     private lateinit var sharedPreferencesRepository: SharedPreferencesRepository

@@ -12,7 +12,7 @@ class SearchHistoryImpl(
     SearchHistoryInteractor {
 
     companion object {
-        const val TRACK_ID = "TRACK_ID"
+        private const val TRACK_ID = "TRACK_ID"
         private const val STORY_SIZE = 10
     }
 
