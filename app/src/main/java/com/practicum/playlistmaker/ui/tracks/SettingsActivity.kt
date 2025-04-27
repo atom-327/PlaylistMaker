@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
-import com.practicum.playlistmaker.App
 import com.practicum.playlistmaker.R
 
 class SettingsActivity : AppCompatActivity() {
@@ -22,9 +21,8 @@ class SettingsActivity : AppCompatActivity() {
         val switchThemeButton = findViewById<SwitchCompat>(R.id.switchThemeButton)
 
         toolbarButton.setNavigationOnClickListener {
-            val returnIntent = Intent(this, MainActivity::class.java)
-            startActivity(returnIntent)
             finish()
+            overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
         }
 
         shareButton.setOnClickListener {

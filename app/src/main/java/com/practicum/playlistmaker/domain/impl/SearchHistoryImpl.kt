@@ -1,26 +1,26 @@
 package com.practicum.playlistmaker.domain.impl
 
-import android.content.SharedPreferences
-import com.google.gson.Gson
-import com.practicum.playlistmaker.App.Companion.TRACK_ID
-import com.practicum.playlistmaker.data.mapper.DataMapper
+import com.practicum.playlistmaker.domain.api.DataMapperRepository
 import com.practicum.playlistmaker.domain.api.SearchHistoryInteractor
+import com.practicum.playlistmaker.domain.api.SharedPreferencesRepository
 import com.practicum.playlistmaker.domain.models.Track
 
-class SearchHistoryImpl(private val sharedPreferences: SharedPreferences) :
+class SearchHistoryImpl(
+    private val sharedPreferencesRepository: SharedPreferencesRepository,
+    private val dataMapper: DataMapperRepository
+) :
     SearchHistoryInteractor {
 
     companion object {
+        const val TRACK_ID = "TRACK_ID"
         private const val STORY_SIZE = 10
     }
 
-    private val gson = Gson()
-
     override fun loadTracks(storyTracks: MutableList<Track>) {
-        val track = sharedPreferences.getString(TRACK_ID, null)
+        val track = sharedPreferencesRepository.getStrItem(TRACK_ID)
         if (track != null) {
             storyTracks.clear()
-            storyTracks.addAll(DataMapper.createTracksFromJson(gson, track))
+            storyTracks.addAll(dataMapper.createTracksFromJson(track))
         }
     }
 
@@ -33,20 +33,22 @@ class SearchHistoryImpl(private val sharedPreferences: SharedPreferences) :
         if (storyTracks.size > STORY_SIZE) {
             storyTracks.removeAt(storyTracks.size - 1)
         }
-        val array = storyTracks.toTypedArray()
-        sharedPreferences.edit().remove(TRACK_ID)
-            .putString(TRACK_ID, DataMapper.createJsonFromTracks(gson, array)).apply()
+        sharedPreferencesRepository.removeItem(TRACK_ID)
+        sharedPreferencesRepository.putStrItem(
+            TRACK_ID,
+            dataMapper.createJsonFromTracks(storyTracks.toTypedArray())
+        )
     }
 
     override fun clearHistory(storyTracks: MutableList<Track>) {
-        sharedPreferences.edit().remove(TRACK_ID).apply()
+        sharedPreferencesRepository.removeItem(TRACK_ID)
         storyTracks.clear()
     }
 
     override fun getListeningTrack(): Track? {
-        val trackStr = sharedPreferences.getString(TRACK_ID, null)
+        val trackStr = sharedPreferencesRepository.getStrItem(TRACK_ID)
         if (trackStr != null) {
-            val tracks = DataMapper.createTracksFromJson(gson, trackStr)
+            val tracks = dataMapper.createTracksFromJson(trackStr)
             return tracks[0]
         } else return null
     }

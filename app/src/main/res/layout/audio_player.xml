@@ -90,19 +90,17 @@
         <ImageButton
             android:id="@+id/addToPlaylistButton"
             style="@style/FunctionTrackButton"
-            android:layout_marginEnd="55dp"
             android:src="@drawable/add_to_playlist"
             app:layout_constraintBottom_toBottomOf="@id/playTrackButton"
-            app:layout_constraintEnd_toStartOf="@id/playTrackButton"
+            app:layout_constraintStart_toStartOf="@id/leftGL"
             app:layout_constraintTop_toTopOf="@id/playTrackButton" />
 
         <ImageButton
             android:id="@+id/toLikeTrackButton"
             style="@style/FunctionTrackButton"
-            android:layout_marginStart="55dp"
             android:src="@drawable/to_like_track_icon"
             app:layout_constraintBottom_toBottomOf="@id/playTrackButton"
-            app:layout_constraintStart_toEndOf="@id/playTrackButton"
+            app:layout_constraintEnd_toStartOf="@id/rightGL"
             app:layout_constraintTop_toTopOf="@id/playTrackButton" />
 
         <TextView

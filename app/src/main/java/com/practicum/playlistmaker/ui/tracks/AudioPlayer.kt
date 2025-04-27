@@ -1,6 +1,5 @@
 package com.practicum.playlistmaker.ui.tracks
 
-import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
@@ -13,13 +12,11 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import com.practicum.playlistmaker.App
 import com.practicum.playlistmaker.Creator
 import com.practicum.playlistmaker.R
-import com.practicum.playlistmaker.domain.impl.SearchHistoryImpl
+import com.practicum.playlistmaker.domain.api.SearchHistoryInteractor
+import com.practicum.playlistmaker.domain.api.SharedPreferencesRepository
 import com.practicum.playlistmaker.domain.models.Track
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 class AudioPlayer : AppCompatActivity() {
     companion object {
@@ -31,6 +28,9 @@ class AudioPlayer : AppCompatActivity() {
     }
 
     private var mediaPlayer = MediaPlayer()
+    private val player = Creator.providePlayerInteractor(mediaPlayer)
+    private lateinit var sharedPreferencesRepository: SharedPreferencesRepository
+    private lateinit var searchHistory: SearchHistoryInteractor
     private var playerState = STATE_DEFAULT
     private var mainThreadHandler: Handler? = null
     private val timerRunnable: Runnable = Runnable { refreshTrackTimer() }
@@ -49,15 +49,14 @@ class AudioPlayer : AppCompatActivity() {
     private lateinit var trackYear: TextView
     private lateinit var trackGenre: TextView
     private lateinit var trackCountry: TextView
-    private val dateFormat by lazy { SimpleDateFormat("mm:ss", Locale.getDefault()) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.audio_player)
 
         mainThreadHandler = Handler(Looper.getMainLooper())
-        val sharedPreferences = Creator.createSharedPreferences()
-        val searchHistory = SearchHistoryImpl(sharedPreferences)
+        sharedPreferencesRepository = Creator.getSharedPreferencesRepository()
+        searchHistory = Creator.provideSearchHistoryInteractor()
         darkTheme = (applicationContext as App).getAppTheme()
         track = searchHistory.getListeningTrack()!!
 
@@ -84,7 +83,7 @@ class AudioPlayer : AppCompatActivity() {
             ).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(trackIcon)
         trackName.text = track.trackName
         artistName.text = track.artistName
-        trackTimeToEnd.text = dateFormat.format(0L)
+        trackTimeToEnd.text = player.getCurrentPosition()
         trackTime.text = track.trackTimeMillis
         trackAlbum.text = track.collectionName
         trackYear.text = track.releaseDate.substringBefore("-")
@@ -92,9 +91,8 @@ class AudioPlayer : AppCompatActivity() {
         trackCountry.text = track.country
 
         searchButton.setNavigationOnClickListener {
-            val returnIntent = Intent(this, SearchActivity::class.java)
-            startActivity(returnIntent)
             finish()
+            overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
         }
 
         preparePlayer(track.previewUrl)
@@ -121,7 +119,7 @@ class AudioPlayer : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        mediaPlayer.release()
+        player.release()
         mainThreadHandler?.removeCallbacks(timerRunnable)
     }
 
@@ -138,8 +136,7 @@ class AudioPlayer : AppCompatActivity() {
     }
 
     private fun preparePlayer(trackUrl: String) {
-        mediaPlayer.setDataSource(trackUrl)
-        mediaPlayer.prepareAsync()
+        player.prepare(trackUrl)
         mediaPlayer.setOnPreparedListener {
             playTrackButton.isEnabled = true
             playerState = STATE_PREPARED
@@ -152,12 +149,12 @@ class AudioPlayer : AppCompatActivity() {
             }
             playerState = STATE_PREPARED
             mainThreadHandler?.removeCallbacks(timerRunnable)
-            trackTimeToEnd.text = dateFormat.format(0L)
+            trackTimeToEnd.text = player.resetTimer()
         }
     }
 
     private fun startPlayer() {
-        mediaPlayer.start()
+        player.play()
         if (darkTheme) {
             playTrackButton.setImageResource(R.drawable.to_stop_track_dark)
         } else {
@@ -168,7 +165,7 @@ class AudioPlayer : AppCompatActivity() {
     }
 
     private fun pausePlayer() {
-        mediaPlayer.pause()
+        player.pause()
         mainThreadHandler?.removeCallbacks(timerRunnable)
         if (darkTheme) {
             playTrackButton.setImageResource(R.drawable.to_play_track_dark)
@@ -180,7 +177,7 @@ class AudioPlayer : AppCompatActivity() {
 
     private fun refreshTrackTimer() {
         if (playerState == STATE_PLAYING) {
-            trackTimeToEnd.text = dateFormat.format(mediaPlayer.currentPosition)
+            trackTimeToEnd.text = player.getCurrentPosition()
             mainThreadHandler?.postDelayed(timerRunnable, REFRESH_SECONDS_VALUE_MILLIS)
         }
     }

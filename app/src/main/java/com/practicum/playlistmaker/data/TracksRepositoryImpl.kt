@@ -8,7 +8,7 @@ import com.practicum.playlistmaker.domain.api.TracksRepository
 class TracksRepositoryImpl(private val networkClient: NetworkClient) : TracksRepository {
     override fun searchTracks(expression: String): List<Track> {
         val response = networkClient.doRequest(ITunesRequest(expression))
-        if (response.resultCode == 200) {
+        if (response.resultCode) {
             return (response as ITunesResponse).results.map {
                 Track(
                     it.trackId,

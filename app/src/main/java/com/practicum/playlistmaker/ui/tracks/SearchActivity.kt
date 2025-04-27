@@ -21,11 +21,12 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.practicum.playlistmaker.App.Companion.TRACK_ID
 import com.practicum.playlistmaker.Creator
 import com.practicum.playlistmaker.R
-import com.practicum.playlistmaker.domain.impl.SearchHistoryImpl
+import com.practicum.playlistmaker.domain.api.SearchHistoryInteractor
+import com.practicum.playlistmaker.domain.api.SharedPreferencesRepository
 import com.practicum.playlistmaker.domain.api.TracksInteractor
+import com.practicum.playlistmaker.domain.impl.SearchHistoryImpl.Companion.TRACK_ID
 import com.practicum.playlistmaker.domain.models.Track
 
 class SearchActivity : AppCompatActivity() {
@@ -39,13 +40,8 @@ class SearchActivity : AppCompatActivity() {
 
     private var editTextValue: String = TEXT_VALUE
 
-//    private val iTunesBaseUrl = "https://itunes.apple.com"
-//    private val retrofit =
-//        Retrofit.Builder().baseUrl(iTunesBaseUrl).addConverterFactory(GsonConverterFactory.create())
-//            .build()
-//    private val itunesService = retrofit.create(ITunesAPI::class.java)
-
-    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var sharedPreferencesRepository: SharedPreferencesRepository
+    private lateinit var searchHistory: SearchHistoryInteractor
     private lateinit var tracksInteractor: TracksInteractor
     private lateinit var listener: SharedPreferences.OnSharedPreferenceChangeListener
 
@@ -74,9 +70,9 @@ class SearchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
-        tracksInteractor = Creator.provideMoviesInteractor()
-        sharedPreferences = Creator.createSharedPreferences()
-        val searchHistory = SearchHistoryImpl(sharedPreferences)
+        tracksInteractor = Creator.provideTracksInteractor()
+        sharedPreferencesRepository = Creator.getSharedPreferencesRepository()
+        searchHistory = Creator.provideSearchHistoryInteractor()
 
         toolbarButton = findViewById(R.id.toolbarButton)
         inputEditText = findViewById(R.id.searchEditText)
@@ -168,9 +164,8 @@ class SearchActivity : AppCompatActivity() {
         }
 
         toolbarButton.setNavigationOnClickListener {
-            val returnIntent = Intent(this, MainActivity::class.java)
-            startActivity(returnIntent)
             finish()
+            overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
         }
 
         updateButton.setOnClickListener {
@@ -183,7 +178,7 @@ class SearchActivity : AppCompatActivity() {
                 storyTracksAdapter.notifyDataSetChanged()
             }
         }
-        sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
+        sharedPreferencesRepository.registerOnSharedPreferenceChangeListener(listener)
     }
 
     private fun search() {
@@ -212,40 +207,6 @@ class SearchActivity : AppCompatActivity() {
                 })
         }
     }
-
-//    private fun search() {
-//        if (inputEditText.text.isNotEmpty()) {
-//            trackList.visibility = View.GONE
-//            placeholderMessage.visibility = View.GONE
-//            storyPlaceholder.visibility = View.GONE
-//            progressBar.visibility = View.VISIBLE
-//
-//            itunesService.search(inputEditText.text.toString())
-//                .enqueue(object : Callback<ITunesResponse> {
-//                    override fun onResponse(
-//                        call: Call<ITunesResponse>, response: Response<ITunesResponse>
-//                    ) {
-//                        progressBar.visibility = View.GONE
-//                        if (response.code() == 200) {
-//                            tracks.clear()
-//                            if (response.body()?.results?.isNotEmpty() == true) {
-//                                trackList.visibility = View.VISIBLE
-//                                tracks.addAll(response.body()?.results!!)
-//                                tracksAdapter.notifyDataSetChanged()
-//                                showMessage("")
-//                            } else {
-//                                showMessage(getString(R.string.nothing_found))
-//                            }
-//                        } else showMessage(getString(R.string.something_went_wrong))
-//                    }
-//
-//                    override fun onFailure(call: Call<ITunesResponse>, t: Throwable) {
-//                        progressBar.visibility = View.GONE
-//                        showMessage(getString(R.string.something_went_wrong))
-//                    }
-//                })
-//        }
-//    }
 
     private fun showMessage(text: String) {
         if (text.isNotEmpty()) {
