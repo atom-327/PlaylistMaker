@@ -35,7 +35,7 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
     var changedText: String = TEXT_VALUE
 
     private val tracksInteractor = Creator.provideTracksInteractor(getApplication())
-    private val searchHistoryInteractor = Creator.provideSearchHistoryInteractor()
+
     private val handler = Handler(Looper.getMainLooper())
     private val searchRunnable = Runnable { search() }
 
@@ -59,9 +59,7 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
         this.changedText = changedText
         onCleared()
 
-        if (changedText.isEmpty()) {
-            loadSearchHistory()
-        } else {
+        if (changedText.isNotEmpty()) {
             handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
         }
     }
@@ -76,29 +74,29 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
                     if (foundTracks != null) {
                         tracks.addAll(foundTracks)
                     }
-                    if (errorMessage != null) {
-                        if (errorMessage == R.string.something_went_wrong.toString()) {
-                            renderState(TracksState.Error(errorMessage))
-                        } else renderState(TracksState.Empty(errorMessage))
-                    } else {
-                        renderState(TracksState.Content(tracks))
+
+                    when {
+                        errorMessage != null -> {
+                            renderState(
+                                TracksState.Error(
+                                    getApplication<App>().getString(R.string.something_went_wrong),
+                                )
+                            )
+                        }
+
+                        tracks.isEmpty() -> {
+                            renderState(
+                                TracksState.Empty(
+                                    getApplication<App>().getString(R.string.nothing_found),
+                                )
+                            )
+                        }
+
+                        else -> renderState(TracksState.Content(tracks))
                     }
                 }
             })
         }
-    }
-
-    fun loadSearchHistory() {
-        val storyList = searchHistoryInteractor.loadTracks()
-        renderState(TracksState.History(storyList))
-    }
-
-    fun clearSearchHistory(storyTracks: MutableList<Track>) {
-        searchHistoryInteractor.clearHistory(storyTracks)
-    }
-
-    fun addToHistory(storyTracks: MutableList<Track>, track: Track) {
-        searchHistoryInteractor.addTrack(storyTracks, track)
     }
 
     private fun renderState(state: TracksState) {

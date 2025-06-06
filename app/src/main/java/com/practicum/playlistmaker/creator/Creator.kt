@@ -17,7 +17,7 @@ import com.practicum.playlistmaker.search.domain.api.SearchHistoryInteractor
 import com.practicum.playlistmaker.domain.api.SharedPreferencesRepository
 import com.practicum.playlistmaker.search.domain.api.TracksInteractor
 import com.practicum.playlistmaker.search.domain.api.TracksRepository
-import com.practicum.playlistmaker.player.domain.impl.PlayerImpl
+import com.practicum.playlistmaker.player.domain.impl.PlayerInteractorImpl
 import com.practicum.playlistmaker.search.domain.impl.SearchHistoryImpl
 import com.practicum.playlistmaker.search.domain.impl.TracksInteractorImpl
 import com.practicum.playlistmaker.settings.data.SettingsRepositoryImpl
@@ -51,7 +51,7 @@ object Creator {
     }
 
     fun providePlayerInteractor(mediaPlayer: MediaPlayer): PlayerInteractor {
-        return PlayerImpl(getPlayerRepository(mediaPlayer))
+        return PlayerInteractorImpl(getPlayerRepository(mediaPlayer))
     }
 
     private fun createSharedPreferences(): SharedPreferences {
@@ -82,11 +82,11 @@ object Creator {
         return SettingsInteractorImpl(getSettingsRepository(context))
     }
 
-    private fun getExternalNavigator(context: Context): ExternalNavigator {
-        return ExternalNavigatorImpl(context)
+    private fun getExternalNavigator(): ExternalNavigator {
+        return ExternalNavigatorImpl()
     }
 
-    fun provideSharingInteractor(context: Context): SharingInteractor {
-        return SharingInteractorImpl(getExternalNavigator(context))
+    fun provideSharingInteractor(): SharingInteractor {
+        return SharingInteractorImpl(getExternalNavigator())
     }
 }

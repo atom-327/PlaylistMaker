@@ -1,5 +1,6 @@
 package com.practicum.playlistmaker.sharing.domain.impl
 
+import android.content.Intent
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.sharing.ExternalNavigator
 import com.practicum.playlistmaker.sharing.domain.api.SharingInteractor
@@ -9,16 +10,16 @@ class SharingInteractorImpl(
     private val externalNavigator: ExternalNavigator,
 ) : SharingInteractor {
 
-    override fun shareApp() {
-        externalNavigator.shareLink(getShareAppLink())
+    override fun shareApp(): Intent {
+        return externalNavigator.shareLink(getShareAppLink())
     }
 
-    override fun openTerms() {
-        externalNavigator.openLink(getTermsLink())
+    override fun openTerms(): Intent {
+        return externalNavigator.openLink(getTermsLink())
     }
 
-    override fun openSupport() {
-        externalNavigator.openEmail(getSupportEmailData())
+    override fun openSupport(): Intent {
+        return externalNavigator.openEmail(getSupportEmailData())
     }
 
     private fun getShareAppLink(): String {

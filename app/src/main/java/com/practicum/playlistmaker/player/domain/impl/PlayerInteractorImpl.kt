@@ -5,7 +5,7 @@ import com.practicum.playlistmaker.player.domain.api.PlayerRepository
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class PlayerImpl(
+class PlayerInteractorImpl(
     private val playerRepository: PlayerRepository,
 ) : PlayerInteractor {
 

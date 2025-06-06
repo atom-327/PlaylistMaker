@@ -1,12 +1,14 @@
 package com.practicum.playlistmaker.settings.presentation.view_model
 
 import android.app.Application
+import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.practicum.playlistmaker.creator.Creator
+import com.practicum.playlistmaker.ui.App
 
 class SettingsViewModel(
     application: Application
@@ -15,22 +17,13 @@ class SettingsViewModel(
     companion object {
         fun getViewModelFactory(): ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                SettingsViewModel(this[APPLICATION_KEY] as Application)
+                SettingsViewModel(this[APPLICATION_KEY] as App)
             }
         }
-
-//        fun factory(context: Context): ViewModelProvider.Factory = viewModelFactory {
-//            initializer {
-//                val sharingInteractor = Creator.provideSharingInteractor(context)
-//                val settingsInteractor = Creator.provideSettingsInteractor(context)
-//
-//                SettingsViewModel(settingsInteractor, sharingInteractor)
-//            }
-//        }
     }
 
     private val settingsInteractor = Creator.provideSettingsInteractor(getApplication())
-    private val sharingInteractor = Creator.provideSharingInteractor(getApplication())
+    private val sharingInteractor = Creator.provideSharingInteractor()
 
     fun getThemeSettings(): Boolean {
         return settingsInteractor.getThemeSettings()
@@ -40,15 +33,15 @@ class SettingsViewModel(
         settingsInteractor.updateThemeSetting(settings)
     }
 
-    fun shareApp() {
-        sharingInteractor.shareApp()
+    fun shareApp(): Intent {
+        return sharingInteractor.shareApp()
     }
 
-    fun openTerms() {
-        sharingInteractor.openTerms()
+    fun openTerms(): Intent {
+        return sharingInteractor.openTerms()
     }
 
-    fun openSupport() {
-        sharingInteractor.openSupport()
+    fun openSupport(): Intent {
+        return sharingInteractor.openSupport()
     }
 }

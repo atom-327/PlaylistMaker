@@ -16,12 +16,12 @@ class SearchHistoryImpl(
         private const val STORY_SIZE = 10
     }
 
-    override fun loadTracks(): List<Track> {
+    override fun loadTracks(storyTracks: MutableList<Track>) {
         val track = sharedPreferencesRepository.getStrItem(TRACK_ID)
         if (track != null) {
-            return dataMapper.createTracksFromJson(track).toList()
+            storyTracks.clear()
+            storyTracks.addAll(dataMapper.createTracksFromJson(track))
         }
-        return emptyList()
     }
 
     override fun addTrack(storyTracks: MutableList<Track>, track: Track) {

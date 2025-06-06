@@ -28,7 +28,7 @@ class TracksRepositoryImpl(private val networkClient: NetworkClient) : TracksRep
             })
 
             else -> {
-                return Resource.Error(R.string.nothing_found.toString())
+                return Resource.Success(emptyList())
             }
         }
     }

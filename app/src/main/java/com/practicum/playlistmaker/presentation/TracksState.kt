@@ -17,8 +17,4 @@ sealed interface TracksState {
     data class Error(
         val errorMessage: String
     ) : TracksState
-
-    data class History(
-        val storyList: List<Track>
-    ) : TracksState
 }
