@@ -13,12 +13,12 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.practicum.playlistmaker.R
-import com.practicum.playlistmaker.creator.Creator
+import com.practicum.playlistmaker.core.creator.Creator
 import com.practicum.playlistmaker.databinding.ActivitySearchBinding
-import com.practicum.playlistmaker.domain.api.SharedPreferencesRepository
-import com.practicum.playlistmaker.domain.models.Track
+import com.practicum.playlistmaker.core.domain.api.SharedPreferencesRepository
+import com.practicum.playlistmaker.core.domain.models.Track
 import com.practicum.playlistmaker.player.ui.AudioPlayer
-import com.practicum.playlistmaker.presentation.TracksState
+import com.practicum.playlistmaker.core.presentation.TracksState
 import com.practicum.playlistmaker.search.domain.api.SearchHistoryInteractor
 import com.practicum.playlistmaker.search.presentation.view_model.SearchViewModel
 

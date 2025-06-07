@@ -1,11 +1,11 @@
-package com.practicum.playlistmaker.ui
+package com.practicum.playlistmaker.core.ui
 
 import android.app.Application
 import android.content.Context
 import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatDelegate
-import com.practicum.playlistmaker.creator.Creator
-import com.practicum.playlistmaker.domain.api.SharedPreferencesRepository
+import com.practicum.playlistmaker.core.creator.Creator
+import com.practicum.playlistmaker.core.domain.api.SharedPreferencesRepository
 
 class App : Application() {
 

@@ -1,40 +1,41 @@
 package com.practicum.playlistmaker.sharing.domain.impl
 
-import android.content.Intent
+import android.content.Context
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.sharing.ExternalNavigator
 import com.practicum.playlistmaker.sharing.domain.api.SharingInteractor
 import com.practicum.playlistmaker.sharing.domain.models.EmailData
 
 class SharingInteractorImpl(
+    private val context: Context,
     private val externalNavigator: ExternalNavigator,
 ) : SharingInteractor {
 
-    override fun shareApp(): Intent {
-        return externalNavigator.shareLink(getShareAppLink())
+    override fun shareApp() {
+        externalNavigator.shareLink(getShareAppLink())
     }
 
-    override fun openTerms(): Intent {
-        return externalNavigator.openLink(getTermsLink())
+    override fun openSupport() {
+        externalNavigator.openEmail(getSupportEmailData())
     }
 
-    override fun openSupport(): Intent {
-        return externalNavigator.openEmail(getSupportEmailData())
+    override fun openTerms() {
+        externalNavigator.openLink(getTermsLink())
     }
 
     private fun getShareAppLink(): String {
-        return R.string.messageToShareApp.toString()
+        return context.getString(R.string.messageToShareApp)
     }
 
     private fun getSupportEmailData(): EmailData {
         return EmailData(
-            R.string.email.toString(),
-            R.string.subjectOfMessage.toString(),
-            R.string.messageToSupport.toString()
+            context.getString(R.string.email),
+            context.getString(R.string.subjectOfMessage),
+            context.getString(R.string.messageToSupport)
         )
     }
 
     private fun getTermsLink(): String {
-        return R.string.agreementLink.toString()
+        return context.getString(R.string.agreementLink)
     }
 }

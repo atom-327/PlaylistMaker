@@ -22,4 +22,6 @@ class PlayerRepositoryImpl(private val mediaPlayer: MediaPlayer) : PlayerReposit
     }
 
     override fun getCurrentPosition(): Long = mediaPlayer.currentPosition.toLong()
+
+    override fun getMediaPlayer(): MediaPlayer = mediaPlayer
 }

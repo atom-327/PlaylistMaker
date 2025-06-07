@@ -7,13 +7,15 @@ import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import com.practicum.playlistmaker.creator.Creator
+import com.practicum.playlistmaker.core.creator.Creator
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.AudioPlayerBinding
-import com.practicum.playlistmaker.domain.api.SharedPreferencesRepository
-import com.practicum.playlistmaker.domain.models.Track
+import com.practicum.playlistmaker.core.domain.api.SharedPreferencesRepository
+import com.practicum.playlistmaker.core.domain.models.Track
+import com.practicum.playlistmaker.player.domain.api.PlayerInteractor
 import com.practicum.playlistmaker.player.presentation.view_model.AudioPlayerViewModel
-import com.practicum.playlistmaker.ui.App
+import com.practicum.playlistmaker.search.domain.api.SearchHistoryInteractor
+import com.practicum.playlistmaker.core.ui.App
 
 class AudioPlayer : AppCompatActivity() {
 
@@ -25,6 +27,8 @@ class AudioPlayer : AppCompatActivity() {
         )[AudioPlayerViewModel::class.java]
     }
 
+    private lateinit var player: PlayerInteractor
+    private lateinit var searchHistory: SearchHistoryInteractor
     private lateinit var sharedPreferencesRepository: SharedPreferencesRepository
 
     private lateinit var track: Track
@@ -36,9 +40,11 @@ class AudioPlayer : AppCompatActivity() {
         binding = AudioPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        player = Creator.providePlayerInteractor()
+        searchHistory = Creator.provideSearchHistoryInteractor()
         sharedPreferencesRepository = Creator.getSharedPreferencesRepository()
         darkTheme = (applicationContext as App).getAppTheme()
-        track = viewModel.getListeningTrack()
+        track = searchHistory.getListeningTrack()!!
 
         setupTrackInfo(track, this)
         setupViews()
@@ -57,7 +63,7 @@ class AudioPlayer : AppCompatActivity() {
                 ).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(trackIcon)
             trackName.text = track.trackName
             artistName.text = track.artistName
-            trackTimeToEnd.text = viewModel.getCurrentPosition()
+            trackTimeToEnd.text = player.getCurrentPosition()
             trackTimeInfo.text = track.trackTimeMillis
             trackAlbumInfo.text = track.collectionName
             trackYearInfo.text = track.releaseDate.substringBefore("-")
@@ -92,6 +98,10 @@ class AudioPlayer : AppCompatActivity() {
         viewModel.getState().observe(this) { state ->
             render(state)
         }
+
+        viewModel.getPosition().observe(this) { position ->
+            binding.trackTimeToEnd.text = position
+        }
     }
 
     override fun onPause() {
@@ -107,24 +117,22 @@ class AudioPlayer : AppCompatActivity() {
     private fun render(state: Int) {
         when (state) {
             0 -> preparePlayer()
-            1 -> startPlayer()
+            1, 3 -> startPlayer()
             2 -> pausePlayer()
-            3 -> startPlayer()
         }
     }
 
     private fun preparePlayer() {
         binding.playTrackButton.isEnabled = true
+        binding.trackTimeToEnd.text = player.resetTimer()
     }
 
     private fun startPlayer() {
         changePlayButtonStyle()
-        binding.trackTimeToEnd.text = viewModel.resetTimer()
     }
 
     private fun pausePlayer() {
         changePauseButtonStyle()
-        binding.trackTimeToEnd.text = viewModel.getCurrentPosition()
     }
 
     private fun changePlayButtonStyle() {

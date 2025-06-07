@@ -2,7 +2,7 @@ package com.practicum.playlistmaker.settings.data
 
 import android.content.Context
 import com.practicum.playlistmaker.settings.domain.api.SettingsRepository
-import com.practicum.playlistmaker.ui.App
+import com.practicum.playlistmaker.core.ui.App
 
 class SettingsRepositoryImpl(private val applicationContext: Context) : SettingsRepository {
     override fun getThemeSettings(): Boolean {

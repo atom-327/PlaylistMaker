@@ -1,7 +1,7 @@
-package com.practicum.playlistmaker.data
+package com.practicum.playlistmaker.core.data
 
 import android.content.SharedPreferences
-import com.practicum.playlistmaker.domain.api.SharedPreferencesRepository
+import com.practicum.playlistmaker.core.domain.api.SharedPreferencesRepository
 
 class SharedPreferencesImpl(private val sharedPreferences: SharedPreferences) :
     SharedPreferencesRepository {

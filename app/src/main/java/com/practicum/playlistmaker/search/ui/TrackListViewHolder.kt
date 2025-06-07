@@ -7,7 +7,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.TrackItemBinding
-import com.practicum.playlistmaker.domain.models.Track
+import com.practicum.playlistmaker.core.domain.models.Track
 
 class TrackListViewHolder(private val binding: TrackItemBinding) :
     RecyclerView.ViewHolder(binding.root) {

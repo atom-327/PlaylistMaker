@@ -1,5 +1,6 @@
 package com.practicum.playlistmaker.player.domain.impl
 
+import android.media.MediaPlayer
 import com.practicum.playlistmaker.player.domain.api.PlayerInteractor
 import com.practicum.playlistmaker.player.domain.api.PlayerRepository
 import java.text.SimpleDateFormat
@@ -34,4 +35,6 @@ class PlayerInteractorImpl(
     override fun resetTimer(): String? {
         return dateFormat.format(0L)
     }
+
+    override fun getMediaPlayer(): MediaPlayer = playerRepository.getMediaPlayer()
 }

@@ -1,20 +1,22 @@
 package com.practicum.playlistmaker.settings.presentation.view_model
 
 import android.app.Application
-import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.practicum.playlistmaker.creator.Creator
-import com.practicum.playlistmaker.ui.App
+import com.practicum.playlistmaker.core.ui.App
 
 class SettingsViewModel(
     application: Application
 ) : AndroidViewModel(application) {
 
     companion object {
+        private const val STATE_DEFAULT = 0
+
         fun getViewModelFactory(): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 SettingsViewModel(this[APPLICATION_KEY] as App)
@@ -22,26 +24,12 @@ class SettingsViewModel(
         }
     }
 
-    private val settingsInteractor = Creator.provideSettingsInteractor(getApplication())
-    private val sharingInteractor = Creator.provideSharingInteractor()
+    private var stateCount = STATE_DEFAULT
 
-    fun getThemeSettings(): Boolean {
-        return settingsInteractor.getThemeSettings()
-    }
+    private val state = MutableLiveData(stateCount)
+    fun getState(): LiveData<Int> = state
 
-    fun updateThemeSetting(settings: Boolean) {
-        settingsInteractor.updateThemeSetting(settings)
-    }
-
-    fun shareApp(): Intent {
-        return sharingInteractor.shareApp()
-    }
-
-    fun openTerms(): Intent {
-        return sharingInteractor.openTerms()
-    }
-
-    fun openSupport(): Intent {
-        return sharingInteractor.openSupport()
+    fun renderState(state: Int) {
+        this.state.postValue(state)
     }
 }

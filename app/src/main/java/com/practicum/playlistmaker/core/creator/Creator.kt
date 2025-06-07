@@ -1,23 +1,25 @@
-package com.practicum.playlistmaker.creator
+package com.practicum.playlistmaker.core.creator
 
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.media.MediaPlayer
+import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import com.practicum.playlistmaker.player.data.PlayerRepositoryImpl
-import com.practicum.playlistmaker.data.SharedPreferencesImpl
+import com.practicum.playlistmaker.core.data.SharedPreferencesImpl
 import com.practicum.playlistmaker.search.data.TracksRepositoryImpl
-import com.practicum.playlistmaker.data.mapper.DataMapper
+import com.practicum.playlistmaker.core.data.mapper.DataMapper
 import com.practicum.playlistmaker.search.data.network.RetrofitNetworkClient
-import com.practicum.playlistmaker.domain.api.DataMapperRepository
+import com.practicum.playlistmaker.core.domain.api.DataMapperRepository
 import com.practicum.playlistmaker.player.domain.api.PlayerInteractor
 import com.practicum.playlistmaker.player.domain.api.PlayerRepository
 import com.practicum.playlistmaker.search.domain.api.SearchHistoryInteractor
-import com.practicum.playlistmaker.domain.api.SharedPreferencesRepository
+import com.practicum.playlistmaker.core.domain.api.SharedPreferencesRepository
 import com.practicum.playlistmaker.search.domain.api.TracksInteractor
 import com.practicum.playlistmaker.search.domain.api.TracksRepository
 import com.practicum.playlistmaker.player.domain.impl.PlayerInteractorImpl
+import com.practicum.playlistmaker.search.data.network.ITunesAPI
 import com.practicum.playlistmaker.search.domain.impl.SearchHistoryImpl
 import com.practicum.playlistmaker.search.domain.impl.TracksInteractorImpl
 import com.practicum.playlistmaker.settings.data.SettingsRepositoryImpl
@@ -28,6 +30,8 @@ import com.practicum.playlistmaker.sharing.ExternalNavigator
 import com.practicum.playlistmaker.sharing.ExternalNavigatorImpl
 import com.practicum.playlistmaker.sharing.domain.api.SharingInteractor
 import com.practicum.playlistmaker.sharing.domain.impl.SharingInteractorImpl
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 object Creator {
 
@@ -38,8 +42,31 @@ object Creator {
         Creator.app = app
     }
 
+    private fun getMediaPlayer(): MediaPlayer {
+        return MediaPlayer()
+    }
+
+    private fun createSharedPreferences(): SharedPreferences {
+        return app.getSharedPreferences(SHARED_PREF, Context.MODE_PRIVATE)
+    }
+
+    private fun createGson(): Gson {
+        return Gson()
+    }
+
+    private fun createItunesService(): ITunesAPI {
+        val iTunesBaseUrl = "https://itunes.apple.com"
+
+        val retrofit =
+            Retrofit.Builder().baseUrl(iTunesBaseUrl)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+
+        return retrofit.create(ITunesAPI::class.java)
+    }
+
     private fun getTracksRepository(context: Context): TracksRepository {
-        return TracksRepositoryImpl(RetrofitNetworkClient(context))
+        return TracksRepositoryImpl(RetrofitNetworkClient(context, createItunesService()))
     }
 
     fun provideTracksInteractor(context: Context): TracksInteractor {
@@ -50,20 +77,12 @@ object Creator {
         return PlayerRepositoryImpl(mediaPlayer)
     }
 
-    fun providePlayerInteractor(mediaPlayer: MediaPlayer): PlayerInteractor {
-        return PlayerInteractorImpl(getPlayerRepository(mediaPlayer))
-    }
-
-    private fun createSharedPreferences(): SharedPreferences {
-        return app.getSharedPreferences(SHARED_PREF, Context.MODE_PRIVATE)
+    fun providePlayerInteractor(): PlayerInteractor {
+        return PlayerInteractorImpl(getPlayerRepository(getMediaPlayer()))
     }
 
     fun getSharedPreferencesRepository(): SharedPreferencesRepository {
         return SharedPreferencesImpl(createSharedPreferences())
-    }
-
-    private fun createGson(): Gson {
-        return Gson()
     }
 
     private fun getDataMapperRepository(): DataMapperRepository {
@@ -82,11 +101,11 @@ object Creator {
         return SettingsInteractorImpl(getSettingsRepository(context))
     }
 
-    private fun getExternalNavigator(): ExternalNavigator {
-        return ExternalNavigatorImpl()
+    private fun getExternalNavigator(context: AppCompatActivity): ExternalNavigator {
+        return ExternalNavigatorImpl(context)
     }
 
-    fun provideSharingInteractor(): SharingInteractor {
-        return SharingInteractorImpl(getExternalNavigator())
+    fun provideSharingInteractor(context: AppCompatActivity): SharingInteractor {
+        return SharingInteractorImpl(context, getExternalNavigator(context))
     }
 }

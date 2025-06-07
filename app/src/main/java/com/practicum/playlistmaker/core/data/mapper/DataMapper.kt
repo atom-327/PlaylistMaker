@@ -1,8 +1,8 @@
-package com.practicum.playlistmaker.data.mapper
+package com.practicum.playlistmaker.core.data.mapper
 
 import com.google.gson.Gson
-import com.practicum.playlistmaker.domain.api.DataMapperRepository
-import com.practicum.playlistmaker.domain.models.Track
+import com.practicum.playlistmaker.core.domain.api.DataMapperRepository
+import com.practicum.playlistmaker.core.domain.models.Track
 
 class DataMapper(private val gson: Gson) : DataMapperRepository {
     override fun createJsonFromTracks(tracks: Array<Track>): String {

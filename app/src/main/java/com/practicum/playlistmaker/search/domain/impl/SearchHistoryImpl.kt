@@ -1,9 +1,9 @@
 package com.practicum.playlistmaker.search.domain.impl
 
-import com.practicum.playlistmaker.domain.api.DataMapperRepository
+import com.practicum.playlistmaker.core.domain.api.DataMapperRepository
 import com.practicum.playlistmaker.search.domain.api.SearchHistoryInteractor
-import com.practicum.playlistmaker.domain.api.SharedPreferencesRepository
-import com.practicum.playlistmaker.domain.models.Track
+import com.practicum.playlistmaker.core.domain.api.SharedPreferencesRepository
+import com.practicum.playlistmaker.core.domain.models.Track
 
 class SearchHistoryImpl(
     private val sharedPreferencesRepository: SharedPreferencesRepository,

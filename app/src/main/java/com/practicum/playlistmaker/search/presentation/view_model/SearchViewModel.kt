@@ -11,11 +11,11 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.practicum.playlistmaker.R
-import com.practicum.playlistmaker.creator.Creator
-import com.practicum.playlistmaker.domain.models.Track
-import com.practicum.playlistmaker.presentation.TracksState
+import com.practicum.playlistmaker.core.creator.Creator
+import com.practicum.playlistmaker.core.domain.models.Track
+import com.practicum.playlistmaker.core.presentation.TracksState
 import com.practicum.playlistmaker.search.domain.api.TracksInteractor
-import com.practicum.playlistmaker.ui.App
+import com.practicum.playlistmaker.core.ui.App
 
 class SearchViewModel(application: Application) : AndroidViewModel(application) {
 

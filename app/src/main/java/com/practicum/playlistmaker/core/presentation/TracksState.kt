@@ -1,6 +1,6 @@
-package com.practicum.playlistmaker.presentation
+package com.practicum.playlistmaker.core.presentation
 
-import com.practicum.playlistmaker.domain.models.Track
+import com.practicum.playlistmaker.core.domain.models.Track
 
 sealed interface TracksState {
 
