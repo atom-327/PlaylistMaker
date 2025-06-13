@@ -10,41 +10,32 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.practicum.playlistmaker.core.creator.Creator
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.AudioPlayerBinding
-import com.practicum.playlistmaker.core.domain.api.SharedPreferencesRepository
 import com.practicum.playlistmaker.core.domain.models.Track
-import com.practicum.playlistmaker.player.domain.api.PlayerInteractor
 import com.practicum.playlistmaker.player.presentation.view_model.AudioPlayerViewModel
-import com.practicum.playlistmaker.search.domain.api.SearchHistoryInteractor
 import com.practicum.playlistmaker.core.ui.App
 
 class AudioPlayer : AppCompatActivity() {
 
     private lateinit var binding: AudioPlayerBinding
 
+    private lateinit var track: Track
+    private lateinit var trackUrl: String
+    private var darkTheme: Boolean = false
+
     private val viewModel by lazy {
         ViewModelProvider(
-            this, AudioPlayerViewModel.getViewModelFactory()
+            this, AudioPlayerViewModel.factory(Creator.providePlayerInteractor(), trackUrl)
         )[AudioPlayerViewModel::class.java]
     }
-
-    private lateinit var player: PlayerInteractor
-    private lateinit var searchHistory: SearchHistoryInteractor
-    private lateinit var sharedPreferencesRepository: SharedPreferencesRepository
-
-    private lateinit var track: Track
-    private var darkTheme: Boolean = false
-    private var isTrackLicked = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = AudioPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        player = Creator.providePlayerInteractor()
-        searchHistory = Creator.provideSearchHistoryInteractor()
-        sharedPreferencesRepository = Creator.getSharedPreferencesRepository()
+        track = Creator.getListeningTrack()
+        trackUrl = track.previewUrl
         darkTheme = (applicationContext as App).getAppTheme()
-        track = searchHistory.getListeningTrack()!!
 
         setupTrackInfo(track, this)
         setupViews()
@@ -63,7 +54,6 @@ class AudioPlayer : AppCompatActivity() {
                 ).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(trackIcon)
             trackName.text = track.trackName
             artistName.text = track.artistName
-            trackTimeToEnd.text = player.getCurrentPosition()
             trackTimeInfo.text = track.trackTimeMillis
             trackAlbumInfo.text = track.collectionName
             trackYearInfo.text = track.releaseDate.substringBefore("-")
@@ -77,30 +67,26 @@ class AudioPlayer : AppCompatActivity() {
             searchButton.setNavigationOnClickListener {
                 finish()
                 overridePendingTransition(
-                    android.R.anim.slide_in_left,
-                    android.R.anim.slide_out_right
+                    android.R.anim.slide_in_left, android.R.anim.slide_out_right
                 )
             }
-
-            viewModel.preparePlayer(track.previewUrl)
 
             playTrackButton.setOnClickListener {
                 viewModel.playbackControl()
             }
 
             toLikeTrackButton.setOnClickListener {
-                changeLickedButtonStyle()
+                viewModel.changeLickedButtonStyle()
             }
         }
     }
 
     private fun setupObservers() {
-        viewModel.getState().observe(this) { state ->
-            render(state)
-        }
-
-        viewModel.getPosition().observe(this) { position ->
-            binding.trackTimeToEnd.text = position
+        viewModel.getState().observe(this) {
+            render(it.state)
+            binding.trackTimeToEnd.text = it.timer
+            binding.playTrackButton.isEnabled = it.isPlayButtonEnabled
+            changeLickedButtonStyle(it.isTrackLicked)
         }
     }
 
@@ -116,15 +102,10 @@ class AudioPlayer : AppCompatActivity() {
 
     private fun render(state: Int) {
         when (state) {
-            0 -> preparePlayer()
-            1, 3 -> startPlayer()
+            1 -> startPlayer()
             2 -> pausePlayer()
+            3 -> startPlayer()
         }
-    }
-
-    private fun preparePlayer() {
-        binding.playTrackButton.isEnabled = true
-        binding.trackTimeToEnd.text = player.resetTimer()
     }
 
     private fun startPlayer() {
@@ -151,13 +132,11 @@ class AudioPlayer : AppCompatActivity() {
         }
     }
 
-    private fun changeLickedButtonStyle() {
-        if (!isTrackLicked) {
+    private fun changeLickedButtonStyle(isTrackLicked: Boolean) {
+        if (isTrackLicked) {
             binding.toLikeTrackButton.setImageResource(R.drawable.track_licked_icon)
-            isTrackLicked = true
         } else {
             binding.toLikeTrackButton.setImageResource(R.drawable.to_like_track_icon)
-            isTrackLicked = false
         }
     }
 }

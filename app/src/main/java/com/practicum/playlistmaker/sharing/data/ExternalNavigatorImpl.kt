@@ -1,29 +1,29 @@
-package com.practicum.playlistmaker.sharing
+package com.practicum.playlistmaker.sharing.data
 
 import android.content.Intent
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
+import com.practicum.playlistmaker.sharing.domain.api.ExternalNavigator
 import com.practicum.playlistmaker.sharing.domain.models.EmailData
 
-class ExternalNavigatorImpl(private val context: AppCompatActivity) : ExternalNavigator {
-    override fun shareLink(shareAppLink: String) {
+class ExternalNavigatorImpl : ExternalNavigator {
+    override fun shareLink(shareAppLink: String): Intent {
         val shareIntent = Intent(Intent.ACTION_SEND).setType("text/plain")
             .putExtra(Intent.EXTRA_TEXT, shareAppLink)
-        context.startActivity(shareIntent)
+        return shareIntent
     }
 
-    override fun openEmail(supportEmailData: EmailData) {
+    override fun openEmail(supportEmailData: EmailData): Intent {
         val supportIntent = Intent(Intent.ACTION_SENDTO)
         supportIntent.data = Uri.parse("mailto:")
         supportIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(supportEmailData.email))
         supportIntent.putExtra(Intent.EXTRA_SUBJECT, supportEmailData.subject)
         supportIntent.putExtra(Intent.EXTRA_TEXT, supportEmailData.message)
-        context.startActivity(supportIntent)
+        return supportIntent
     }
 
-    override fun openLink(termsLink: String) {
+    override fun openLink(termsLink: String): Intent {
         val agreementIntent = Intent(Intent.ACTION_VIEW)
         agreementIntent.data = Uri.parse(termsLink)
-        context.startActivity(agreementIntent)
+        return agreementIntent
     }
 }

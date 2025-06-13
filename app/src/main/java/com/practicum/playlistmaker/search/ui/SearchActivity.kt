@@ -15,11 +15,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.core.creator.Creator
 import com.practicum.playlistmaker.databinding.ActivitySearchBinding
-import com.practicum.playlistmaker.core.domain.api.SharedPreferencesRepository
 import com.practicum.playlistmaker.core.domain.models.Track
 import com.practicum.playlistmaker.player.ui.AudioPlayer
-import com.practicum.playlistmaker.core.presentation.TracksState
-import com.practicum.playlistmaker.search.domain.api.SearchHistoryInteractor
+import com.practicum.playlistmaker.search.presentation.TracksState
 import com.practicum.playlistmaker.search.presentation.view_model.SearchViewModel
 
 class SearchActivity : AppCompatActivity() {
@@ -29,16 +27,14 @@ class SearchActivity : AppCompatActivity() {
         private const val TEXT_KEY = "TEXT_KEY"
     }
 
-    private lateinit var searchHistory: SearchHistoryInteractor
     private lateinit var binding: ActivitySearchBinding
 
     private val viewModel by lazy {
         ViewModelProvider(
-            this, SearchViewModel.getViewModelFactory()
+            this, SearchViewModel.factory(Creator.provideSearchHistoryInteractor())
         )[SearchViewModel::class.java]
     }
 
-    private lateinit var sharedPreferencesRepository: SharedPreferencesRepository
     private lateinit var listener: SharedPreferences.OnSharedPreferenceChangeListener
     private lateinit var tracksAdapter: TrackListAdapter
     private lateinit var storyTracksAdapter: TrackListAdapter
@@ -51,9 +47,6 @@ class SearchActivity : AppCompatActivity() {
         binding = ActivitySearchBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        searchHistory = Creator.provideSearchHistoryInteractor()
-        sharedPreferencesRepository = Creator.getSharedPreferencesRepository()
-
         if (savedInstanceState != null) {
             viewModel.changedText = savedInstanceState.getString(TEXT_KEY, "")
             binding.searchEditText.setText(viewModel.changedText)
@@ -61,11 +54,11 @@ class SearchActivity : AppCompatActivity() {
 
         listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             if (key == TRACK_ID) {
-                searchHistory.loadTracks(storyList)
+                viewModel.loadTracks(storyList)
                 storyTracksAdapter.notifyDataSetChanged()
             }
         }
-        sharedPreferencesRepository.registerOnSharedPreferenceChangeListener(listener)
+        Creator.getSharedPreferencesRepository().registerOnSharedPreferenceChangeListener(listener)
 
         setupViews()
         setupObservers()
@@ -105,7 +98,7 @@ class SearchActivity : AppCompatActivity() {
 
             searchEditText.setOnFocusChangeListener { _, hasFocus ->
                 if (hasFocus && searchEditText.text.isEmpty()) {
-                    searchHistory.loadTracks(storyList)
+                    viewModel.loadTracks(storyList)
                     storyTracksAdapter.notifyDataSetChanged()
                     if (storyList.size != 0) {
                         showHistory()
@@ -121,7 +114,7 @@ class SearchActivity : AppCompatActivity() {
             }
 
             clearStoryTracksButton.setOnClickListener {
-                searchHistory.clearHistory(storyList)
+                viewModel.clearHistory(storyList)
                 storyTracksAdapter.notifyDataSetChanged()
                 storyTracks.visibility = View.GONE
             }
@@ -137,7 +130,7 @@ class SearchActivity : AppCompatActivity() {
     private fun setupRecyclerView() {
         tracksAdapter = TrackListAdapter(tracks) { track ->
             if (viewModel.clickDebounce()) {
-                searchHistory.addTrack(storyList, track)
+                viewModel.addTrack(storyList, track)
                 val audioPlayerIntent = Intent(this, AudioPlayer::class.java)
                 startActivity(audioPlayerIntent)
             }
@@ -147,7 +140,7 @@ class SearchActivity : AppCompatActivity() {
 
         storyTracksAdapter = TrackListAdapter(storyList) { track ->
             if (viewModel.clickDebounce()) {
-                searchHistory.addTrack(storyList, track)
+                viewModel.addTrack(storyList, track)
                 val audioPlayerIntent = Intent(this, AudioPlayer::class.java)
                 startActivity(audioPlayerIntent)
             }

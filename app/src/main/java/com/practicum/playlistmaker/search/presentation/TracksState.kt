@@ -1,4 +1,4 @@
-package com.practicum.playlistmaker.core.presentation
+package com.practicum.playlistmaker.search.presentation
 
 import com.practicum.playlistmaker.core.domain.models.Track
 

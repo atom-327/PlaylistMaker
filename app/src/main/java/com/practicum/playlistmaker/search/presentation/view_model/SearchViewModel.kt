@@ -3,9 +3,9 @@ package com.practicum.playlistmaker.search.presentation.view_model
 import android.app.Application
 import android.os.Handler
 import android.os.Looper
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewmodel.initializer
@@ -13,28 +13,36 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.core.creator.Creator
 import com.practicum.playlistmaker.core.domain.models.Track
-import com.practicum.playlistmaker.core.presentation.TracksState
+import com.practicum.playlistmaker.search.presentation.TracksState
+import com.practicum.playlistmaker.search.domain.api.SearchHistoryInteractor
 import com.practicum.playlistmaker.search.domain.api.TracksInteractor
-import com.practicum.playlistmaker.core.ui.App
 
-class SearchViewModel(application: Application) : AndroidViewModel(application) {
+class SearchViewModel(
+    private val tracksHistory: SearchHistoryInteractor,
+    private val errorStr: String,
+    private val emptyStr: String
+) : ViewModel() {
 
     companion object {
         private const val CLICK_DEBOUNCE_DELAY = 1_000L
         private const val SEARCH_DEBOUNCE_DELAY = 2_000L
         private const val TEXT_VALUE = ""
 
-        fun getViewModelFactory(): ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                SearchViewModel(this[APPLICATION_KEY] as App)
+        fun factory(searchHistory: SearchHistoryInteractor): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    val app = (this[APPLICATION_KEY] as Application)
+                    val errorMessage = app.getString(R.string.something_went_wrong)
+                    val emptyMessage = app.getString(R.string.nothing_found)
+                    SearchViewModel(searchHistory, errorMessage, emptyMessage)
+                }
             }
-        }
     }
 
     private var isClickAllowed = true
     var changedText: String = TEXT_VALUE
 
-    private val tracksInteractor = Creator.provideTracksInteractor(getApplication())
+    private val tracksInteractor = Creator.provideTracksInteractor()
 
     private val handler = Handler(Looper.getMainLooper())
     private val searchRunnable = Runnable { search() }
@@ -79,7 +87,7 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
                         errorMessage != null -> {
                             renderState(
                                 TracksState.Error(
-                                    getApplication<App>().getString(R.string.something_went_wrong),
+                                    errorStr
                                 )
                             )
                         }
@@ -87,7 +95,7 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
                         tracks.isEmpty() -> {
                             renderState(
                                 TracksState.Empty(
-                                    getApplication<App>().getString(R.string.nothing_found),
+                                    emptyStr
                                 )
                             )
                         }
@@ -101,6 +109,18 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
 
     private fun renderState(state: TracksState) {
         this.state.postValue(state)
+    }
+
+    fun loadTracks(tracks: MutableList<Track>) {
+        tracksHistory.loadTracks(tracks)
+    }
+
+    fun clearHistory(tracks: MutableList<Track>) {
+        tracksHistory.clearHistory(tracks)
+    }
+
+    fun addTrack(tracks: MutableList<Track>, track: Track) {
+        tracksHistory.addTrack(tracks, track)
     }
 
     override fun onCleared() {

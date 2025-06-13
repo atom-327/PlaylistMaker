@@ -10,6 +10,6 @@ class SettingsInteractorImpl(private val settingsRepository: SettingsRepository)
     }
 
     override fun updateThemeSetting(settings: Boolean) {
-        settingsRepository.updateThemeSetting(settings)
+        return settingsRepository.updateThemeSetting(settings)
     }
 }
