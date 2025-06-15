@@ -3,6 +3,7 @@ package com.practicum.playlistmaker.settings.ui
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import com.practicum.playlistmaker.core.creator.Creator
 import com.practicum.playlistmaker.databinding.ActivitySettingsBinding
 import com.practicum.playlistmaker.settings.presentation.view_model.SettingsViewModel
 
@@ -12,7 +13,9 @@ class SettingsActivity : AppCompatActivity() {
 
     private val viewModel by lazy {
         ViewModelProvider(
-            this, SettingsViewModel.getViewModelFactory()
+            this, SettingsViewModel.factory(
+                Creator.provideSettingsInteractor(), Creator.provideSharingInteractor(this)
+            )
         )[SettingsViewModel::class.java]
     }
 
@@ -55,9 +58,6 @@ class SettingsActivity : AppCompatActivity() {
     private fun setupObservers() {
         viewModel.getState().observe(this) {
             binding.switchThemeButton.isChecked = it.isDarkTheme
-            if (it.state != null) {
-                startActivity(it.state)
-            }
         }
     }
 }

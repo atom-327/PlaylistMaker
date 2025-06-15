@@ -1,29 +1,50 @@
 package com.practicum.playlistmaker.sharing.data
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.sharing.domain.api.ExternalNavigator
 import com.practicum.playlistmaker.sharing.domain.models.EmailData
 
-class ExternalNavigatorImpl : ExternalNavigator {
-    override fun shareLink(shareAppLink: String): Intent {
+class ExternalNavigatorImpl(private val app: Context) : ExternalNavigator {
+    override fun shareLink() {
+        val shareAppLink = getShareAppLink()
         val shareIntent = Intent(Intent.ACTION_SEND).setType("text/plain")
             .putExtra(Intent.EXTRA_TEXT, shareAppLink)
-        return shareIntent
+        app.startActivity(shareIntent)
     }
 
-    override fun openEmail(supportEmailData: EmailData): Intent {
+    override fun openEmail() {
+        val supportEmailData = getSupportEmailData()
         val supportIntent = Intent(Intent.ACTION_SENDTO)
         supportIntent.data = Uri.parse("mailto:")
         supportIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(supportEmailData.email))
         supportIntent.putExtra(Intent.EXTRA_SUBJECT, supportEmailData.subject)
         supportIntent.putExtra(Intent.EXTRA_TEXT, supportEmailData.message)
-        return supportIntent
+        app.startActivity(supportIntent)
     }
 
-    override fun openLink(termsLink: String): Intent {
+    override fun openLink() {
+        val termsLink = getTermsLink()
         val agreementIntent = Intent(Intent.ACTION_VIEW)
         agreementIntent.data = Uri.parse(termsLink)
-        return agreementIntent
+        app.startActivity(agreementIntent)
+    }
+
+    private fun getShareAppLink(): String {
+        return app.getString(R.string.messageToShareApp)
+    }
+
+    private fun getSupportEmailData(): EmailData {
+        return EmailData(
+            app.getString(R.string.email),
+            app.getString(R.string.subjectOfMessage),
+            app.getString(R.string.messageToSupport)
+        )
+    }
+
+    private fun getTermsLink(): String {
+        return app.getString(R.string.agreementLink)
     }
 }

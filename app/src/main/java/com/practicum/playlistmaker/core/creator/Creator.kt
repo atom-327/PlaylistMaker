@@ -105,11 +105,11 @@ object Creator {
         return SettingsInteractorImpl(getSettingsRepository(app))
     }
 
-    private fun getExternalNavigator(): ExternalNavigator {
-        return ExternalNavigatorImpl()
+    private fun getExternalNavigator(context: Context): ExternalNavigator {
+        return ExternalNavigatorImpl(context)
     }
 
-    fun provideSharingInteractor(): SharingInteractor {
-        return SharingInteractorImpl(getExternalNavigator())
+    fun provideSharingInteractor(context: Context): SharingInteractor {
+        return SharingInteractorImpl(getExternalNavigator(context))
     }
 }
