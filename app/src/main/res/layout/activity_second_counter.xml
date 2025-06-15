@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/leftGL"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="@dimen/_12dp" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/rightGL"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_end="@dimen/_12dp" />
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarSecondCounterButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/Theme.Toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="Таймер"
+        app:titleTextAppearance="@style/TopTextStyle">
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <EditText
+        android:id="@+id/secondsInput"
+        style="@style/SearchEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_8dp"
+        android:layout_marginTop="@dimen/_8dp"
+        android:hint="Время"
+        android:imeOptions="actionDone"
+        android:inputType="number"
+        android:maxLines="1"
+        android:singleLine="true"
+        android:textCursorDrawable="@drawable/cursor_color"
+        app:layout_constraintEnd_toStartOf="@id/rightGL"
+        app:layout_constraintStart_toStartOf="@id/leftGL"
+        app:layout_constraintTop_toBottomOf="@id/toolbarSecondCounterButton" />
+
+    <Button
+        android:id="@+id/startButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_8dp"
+        android:layout_marginTop="@dimen/_8dp"
+        android:backgroundTint="@color/grey"
+        android:fontFamily="@font/ys_display_regular"
+        android:text="Старт"
+        android:textAllCaps="false"
+        android:textColor="@color/black"
+        android:textSize="@dimen/_16sp"
+        app:cornerRadius="@dimen/_8dp"
+        app:layout_constraintEnd_toStartOf="@id/rightGL"
+        app:layout_constraintStart_toStartOf="@id/leftGL"
+        app:layout_constraintTop_toBottomOf="@id/secondsInput" />
+
+    <Button
+        android:id="@+id/stopButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_8dp"
+        android:layout_marginTop="@dimen/_8dp"
+        android:backgroundTint="@color/grey"
+        android:fontFamily="@font/ys_display_regular"
+        android:text="Сброс таймера"
+        android:textAllCaps="false"
+        android:textColor="@color/black"
+        android:textSize="@dimen/_16sp"
+        app:cornerRadius="@dimen/_8dp"
+        app:layout_constraintEnd_toStartOf="@id/rightGL"
+        app:layout_constraintStart_toStartOf="@id/leftGL"
+        app:layout_constraintTop_toBottomOf="@id/startButton" />
+
+    <TextView
+        android:id="@+id/secondsValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/ys_display_medium"
+        android:textColor="@color/black"
+        android:textSize="64sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/rightGL"
+        app:layout_constraintStart_toStartOf="@id/leftGL"
+        app:layout_constraintTop_toBottomOf="@id/stopButton" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
