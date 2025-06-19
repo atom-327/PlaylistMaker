@@ -3,29 +3,33 @@ package com.practicum.playlistmaker.player.ui
 import android.os.Bundle
 import android.util.TypedValue
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import com.practicum.playlistmaker.core.creator.Creator
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.AudioPlayerBinding
 import com.practicum.playlistmaker.core.domain.models.Track
 import com.practicum.playlistmaker.player.presentation.view_model.AudioPlayerViewModel
 import com.practicum.playlistmaker.core.ui.App
+import com.practicum.playlistmaker.player.domain.api.PlayerInteractor
+import com.practicum.playlistmaker.search.domain.api.SearchHistoryInteractor
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 
 class AudioPlayer : AppCompatActivity() {
 
     private lateinit var binding: AudioPlayerBinding
 
     private lateinit var track: Track
-    private lateinit var trackUrl: String
     private var darkTheme: Boolean = false
 
-    private val viewModel by lazy {
-        ViewModelProvider(
-            this, AudioPlayerViewModel.factory(Creator.providePlayerInteractor(), trackUrl)
-        )[AudioPlayerViewModel::class.java]
+    private val playerInteractor: PlayerInteractor by inject()
+    private val searchHistoryInteractor: SearchHistoryInteractor by inject()
+    private lateinit var trackUrl: String
+
+    private val viewModel: AudioPlayerViewModel by viewModel {
+        parametersOf(playerInteractor, trackUrl)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,7 +37,7 @@ class AudioPlayer : AppCompatActivity() {
         binding = AudioPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        track = Creator.getListeningTrack()
+        track = searchHistoryInteractor.getListeningTrack()!!
         trackUrl = track.previewUrl
         darkTheme = (applicationContext as App).getAppTheme()
 

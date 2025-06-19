@@ -3,7 +3,7 @@ package com.practicum.playlistmaker.core.data
 import android.content.SharedPreferences
 import com.practicum.playlistmaker.core.domain.api.SharedPreferencesRepository
 
-class SharedPreferencesImpl(private val sharedPreferences: SharedPreferences) :
+class SharedPreferencesRepositoryImpl(private val sharedPreferences: SharedPreferences) :
     SharedPreferencesRepository {
 
     override fun getStrItem(itemId: String): String? {

@@ -4,14 +4,13 @@ import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.practicum.playlistmaker.player.domain.api.PlayerInteractor
 import com.practicum.playlistmaker.player.presentation.PlayerState
 
-class AudioPlayerViewModel(private val player: PlayerInteractor, private val url: String) :
-    ViewModel() {
+class AudioPlayerViewModel(
+    private val player: PlayerInteractor,
+    private val trackUrl: String
+) : ViewModel() {
 
     companion object {
         private const val STATE_DEFAULT = 0
@@ -19,9 +18,6 @@ class AudioPlayerViewModel(private val player: PlayerInteractor, private val url
         private const val STATE_PLAYING = 2
         private const val STATE_PAUSED = 3
         private const val REFRESH_SECONDS_VALUE_MILLIS = 200L
-
-        fun factory(player: PlayerInteractor, trackUrl: String): ViewModelProvider.Factory =
-            viewModelFactory { initializer { AudioPlayerViewModel(player, trackUrl) } }
     }
 
     private var mainThreadHandler = android.os.Handler(Looper.getMainLooper())
@@ -76,7 +72,7 @@ class AudioPlayerViewModel(private val player: PlayerInteractor, private val url
     }
 
     private fun preparePlayer() {
-        player.prepare(url)
+        player.prepare(trackUrl)
         player.getMediaPlayer().setOnPreparedListener {
             state.value = state.value?.copy(isPlayButtonEnabled = true)
             renderState(STATE_PREPARED)

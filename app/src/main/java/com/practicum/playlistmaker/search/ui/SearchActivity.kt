@@ -10,15 +10,19 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.practicum.playlistmaker.R
-import com.practicum.playlistmaker.core.creator.Creator
+import com.practicum.playlistmaker.core.domain.api.SharedPreferencesRepository
 import com.practicum.playlistmaker.databinding.ActivitySearchBinding
 import com.practicum.playlistmaker.core.domain.models.Track
 import com.practicum.playlistmaker.player.ui.AudioPlayer
+import com.practicum.playlistmaker.search.domain.api.SearchHistoryInteractor
+import com.practicum.playlistmaker.search.domain.api.TracksInteractor
 import com.practicum.playlistmaker.search.presentation.TracksState
 import com.practicum.playlistmaker.search.presentation.view_model.SearchViewModel
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 
 class SearchActivity : AppCompatActivity() {
 
@@ -29,10 +33,15 @@ class SearchActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySearchBinding
 
-    private val viewModel by lazy {
-        ViewModelProvider(
-            this, SearchViewModel.factory(Creator.provideSearchHistoryInteractor())
-        )[SearchViewModel::class.java]
+    private lateinit var errorMessage: String
+    private lateinit var emptyMessage: String
+
+    private val tracksInteractor: TracksInteractor by inject()
+    private val searchHistoryInteractor: SearchHistoryInteractor by inject()
+    private val sharedPreferencesRepository: SharedPreferencesRepository by inject()
+
+    private val viewModel: SearchViewModel by viewModel {
+        parametersOf(tracksInteractor, searchHistoryInteractor, errorMessage, emptyMessage)
     }
 
     private lateinit var listener: SharedPreferences.OnSharedPreferenceChangeListener
@@ -47,6 +56,9 @@ class SearchActivity : AppCompatActivity() {
         binding = ActivitySearchBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        errorMessage = getString(R.string.something_went_wrong)
+        emptyMessage = getString(R.string.nothing_found)
+
         if (savedInstanceState != null) {
             viewModel.changedText = savedInstanceState.getString(TEXT_KEY, "")
             binding.searchEditText.setText(viewModel.changedText)
@@ -58,7 +70,7 @@ class SearchActivity : AppCompatActivity() {
                 storyTracksAdapter.notifyDataSetChanged()
             }
         }
-        Creator.getSharedPreferencesRepository().registerOnSharedPreferenceChangeListener(listener)
+        sharedPreferencesRepository.registerOnSharedPreferenceChangeListener(listener)
 
         setupViews()
         setupObservers()

@@ -2,7 +2,7 @@ package com.practicum.playlistmaker.core.domain.api
 
 import com.practicum.playlistmaker.core.domain.models.Track
 
-interface DataMapperRepository {
+interface DataMapper {
     fun createJsonFromTracks(tracks: Array<Track>): String
     fun createTracksFromJson(json: String): Array<Track>
 }
