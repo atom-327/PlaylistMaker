@@ -1,10 +1,12 @@
 package com.practicum.playlistmaker.search.presentation.view_model
 
+import android.content.SharedPreferences
 import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.practicum.playlistmaker.core.domain.api.SharedPreferencesRepository
 import com.practicum.playlistmaker.core.domain.models.Track
 import com.practicum.playlistmaker.search.presentation.TracksState
 import com.practicum.playlistmaker.search.domain.api.SearchHistoryInteractor
@@ -13,6 +15,7 @@ import com.practicum.playlistmaker.search.domain.api.TracksInteractor
 class SearchViewModel(
     private val tracksInteractor: TracksInteractor,
     private val searchHistory: SearchHistoryInteractor,
+    private val sharedPreferencesRepository: SharedPreferencesRepository,
     private val errorStr: String,
     private val emptyStr: String
 ) : ViewModel() {
@@ -103,6 +106,10 @@ class SearchViewModel(
 
     fun addTrack(tracks: MutableList<Track>, track: Track) {
         searchHistory.addTrack(tracks, track)
+    }
+
+    fun registerOnSharedPreferenceChangeListener(listener: SharedPreferences.OnSharedPreferenceChangeListener) {
+        sharedPreferencesRepository.registerOnSharedPreferenceChangeListener(listener)
     }
 
     override fun onCleared() {

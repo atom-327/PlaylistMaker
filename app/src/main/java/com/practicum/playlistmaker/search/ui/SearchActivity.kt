@@ -12,15 +12,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.practicum.playlistmaker.R
-import com.practicum.playlistmaker.core.domain.api.SharedPreferencesRepository
 import com.practicum.playlistmaker.databinding.ActivitySearchBinding
 import com.practicum.playlistmaker.core.domain.models.Track
 import com.practicum.playlistmaker.player.ui.AudioPlayer
-import com.practicum.playlistmaker.search.domain.api.SearchHistoryInteractor
-import com.practicum.playlistmaker.search.domain.api.TracksInteractor
 import com.practicum.playlistmaker.search.presentation.TracksState
 import com.practicum.playlistmaker.search.presentation.view_model.SearchViewModel
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -36,12 +32,8 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var errorMessage: String
     private lateinit var emptyMessage: String
 
-    private val tracksInteractor: TracksInteractor by inject()
-    private val searchHistoryInteractor: SearchHistoryInteractor by inject()
-    private val sharedPreferencesRepository: SharedPreferencesRepository by inject()
-
     private val viewModel: SearchViewModel by viewModel {
-        parametersOf(tracksInteractor, searchHistoryInteractor, errorMessage, emptyMessage)
+        parametersOf(errorMessage, emptyMessage)
     }
 
     private lateinit var listener: SharedPreferences.OnSharedPreferenceChangeListener
@@ -70,7 +62,7 @@ class SearchActivity : AppCompatActivity() {
                 storyTracksAdapter.notifyDataSetChanged()
             }
         }
-        sharedPreferencesRepository.registerOnSharedPreferenceChangeListener(listener)
+        viewModel.registerOnSharedPreferenceChangeListener(listener)
 
         setupViews()
         setupObservers()

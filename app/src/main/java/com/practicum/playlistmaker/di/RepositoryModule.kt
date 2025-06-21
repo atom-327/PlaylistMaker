@@ -16,7 +16,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val repositoryModule = module {
-    single<SharedPreferencesRepository> {
+    factory<SharedPreferencesRepository> {
         SharedPreferencesRepositoryImpl(get())
     }
 
@@ -24,19 +24,19 @@ val repositoryModule = module {
         DataMapperImpl(get())
     }
 
-    single<TracksRepository> {
+    factory<TracksRepository> {
         TracksRepositoryImpl(get())
     }
 
-    single<PlayerRepository> {
+    factory<PlayerRepository> {
         PlayerRepositoryImpl(get())
     }
 
-    single<SettingsRepository> {
+    factory<SettingsRepository> {
         SettingsRepositoryImpl(androidContext())
     }
 
-    single<ExternalNavigator> {
+    factory<ExternalNavigator> {
         ExternalNavigatorImpl(androidContext())
     }
 }
