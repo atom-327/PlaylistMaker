@@ -3,29 +3,28 @@ package com.practicum.playlistmaker.player.ui
 import android.os.Bundle
 import android.util.TypedValue
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import com.practicum.playlistmaker.core.creator.Creator
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.AudioPlayerBinding
 import com.practicum.playlistmaker.core.domain.models.Track
 import com.practicum.playlistmaker.player.presentation.view_model.AudioPlayerViewModel
 import com.practicum.playlistmaker.core.ui.App
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 
 class AudioPlayer : AppCompatActivity() {
 
     private lateinit var binding: AudioPlayerBinding
 
-    private lateinit var track: Track
-    private lateinit var trackUrl: String
     private var darkTheme: Boolean = false
+    private var track: Track? = null
+    private var state = -1
+    private var isTrackLicked = false
 
-    private val viewModel by lazy {
-        ViewModelProvider(
-            this, AudioPlayerViewModel.factory(Creator.providePlayerInteractor(), trackUrl)
-        )[AudioPlayerViewModel::class.java]
+    private val viewModel: AudioPlayerViewModel by viewModel {
+        parametersOf()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,33 +32,10 @@ class AudioPlayer : AppCompatActivity() {
         binding = AudioPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        track = Creator.getListeningTrack()
-        trackUrl = track.previewUrl
         darkTheme = (applicationContext as App).getAppTheme()
 
-        setupTrackInfo(track, this)
         setupViews()
         setupObservers()
-    }
-
-    private fun setupTrackInfo(track: Track, audioPlayer: AudioPlayer) {
-        with(binding) {
-            Glide.with(audioPlayer).load(track.getCoverArtwork())
-                .placeholder(R.drawable.track_icon_placeholder).centerCrop().transform(
-                    RoundedCorners(
-                        TypedValue.applyDimension(
-                            TypedValue.COMPLEX_UNIT_DIP, 8F, resources.displayMetrics
-                        ).toInt()
-                    )
-                ).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(trackIcon)
-            trackName.text = track.trackName
-            artistName.text = track.artistName
-            trackTimeInfo.text = track.trackTimeMillis
-            trackAlbumInfo.text = track.collectionName
-            trackYearInfo.text = track.releaseDate.substringBefore("-")
-            trackGenreInfo.text = track.primaryGenreName
-            trackCountryInfo.text = track.country
-        }
     }
 
     private fun setupViews() {
@@ -83,10 +59,40 @@ class AudioPlayer : AppCompatActivity() {
 
     private fun setupObservers() {
         viewModel.getState().observe(this) {
-            render(it.state)
+            if (track != it.track) {
+                setupTrackInfo(it.track, this)
+                track = it.track
+            }
+            if (state != it.state) {
+                render(it.state)
+                state = it.state
+            }
             binding.trackTimeToEnd.text = it.timer
             binding.playTrackButton.isEnabled = it.isPlayButtonEnabled
-            changeLickedButtonStyle(it.isTrackLicked)
+            if (isTrackLicked != it.isTrackLicked) {
+                changeLickedButtonStyle(it.isTrackLicked)
+                isTrackLicked = it.isTrackLicked
+            }
+        }
+    }
+
+    private fun setupTrackInfo(track: Track, audioPlayer: AudioPlayer) {
+        with(binding) {
+            Glide.with(audioPlayer).load(track.getCoverArtwork())
+                .placeholder(R.drawable.track_icon_placeholder).centerCrop().transform(
+                    RoundedCorners(
+                        TypedValue.applyDimension(
+                            TypedValue.COMPLEX_UNIT_DIP, 8F, resources.displayMetrics
+                        ).toInt()
+                    )
+                ).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(trackIcon)
+            trackName.text = track.trackName
+            artistName.text = track.artistName
+            trackTimeInfo.text = track.trackTimeMillis
+            trackAlbumInfo.text = track.collectionName
+            trackYearInfo.text = track.releaseDate.substringBefore("-")
+            trackGenreInfo.text = track.primaryGenreName
+            trackCountryInfo.text = track.country
         }
     }
 

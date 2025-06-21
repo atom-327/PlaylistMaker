@@ -41,26 +41,31 @@ android {
 }
 
 dependencies {
-    val moxyVersion = "2.2.2"
-    implementation("com.github.moxy-community:moxy:$moxyVersion")
-    implementation("com.github.moxy-community:moxy-android:$moxyVersion")
-    kapt("com.github.moxy-community:moxy-compiler:$moxyVersion")
-    implementation("androidx.core:core-ktx:1.12.0")
-//    implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.databinding:viewbinding:8.2.2")
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.google.android.material:material:1.11.0")
-//    implementation("com.google.android.material:material:1.7.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.google.code.gson:gson:2.10")
-    implementation("com.github.bumptech.glide:glide:4.14.2")
-    annotationProcessor("com.github.bumptech.glide:compiler:4.14.2")
-//    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    implementation(libs.androidx.activity)
-    implementation(libs.androidx.constraintlayout)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+
+    dependencies {
+        implementation(libs.moxy)
+        implementation(libs.moxy.android)
+        kapt(libs.moxy.compiler)
+
+        implementation(libs.androidx.core.ktx)
+        implementation(libs.androidx.viewbinding)
+        implementation(libs.androidx.appcompat)
+        implementation(libs.androidx.activity)
+        implementation(libs.androidx.constraintlayout)
+
+        implementation(libs.material)
+
+        implementation(libs.retrofit)
+        implementation(libs.retrofit.gson)
+        implementation(libs.gson)
+
+        implementation(libs.glide)
+        annotationProcessor(libs.glide.compiler)
+
+        implementation(libs.koin.android)
+
+        testImplementation(libs.junit)
+        androidTestImplementation(libs.androidx.junit)
+        androidTestImplementation(libs.androidx.espresso.core)
+    }
 }

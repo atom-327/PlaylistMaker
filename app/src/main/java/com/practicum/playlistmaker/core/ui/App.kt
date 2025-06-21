@@ -4,8 +4,14 @@ import android.app.Application
 import android.content.Context
 import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatDelegate
-import com.practicum.playlistmaker.core.creator.Creator
 import com.practicum.playlistmaker.core.domain.api.SharedPreferencesRepository
+import com.practicum.playlistmaker.di.dataModule
+import com.practicum.playlistmaker.di.interactorModule
+import com.practicum.playlistmaker.di.repositoryModule
+import com.practicum.playlistmaker.di.viewModelModule
+import org.koin.android.ext.android.inject
+import org.koin.android.ext.koin.androidContext
+import org.koin.core.context.GlobalContext.startKoin
 
 class App : Application() {
 
@@ -14,14 +20,19 @@ class App : Application() {
         private const val TEXT_KEY = "isDarkTheme"
     }
 
-    private lateinit var sharedPreferencesRepository: SharedPreferencesRepository
+    private val sharedPreferencesRepository: SharedPreferencesRepository by inject()
+
     private var darkTheme = false
     private val context = this
 
     override fun onCreate() {
         super.onCreate()
-        Creator.initApplication(this)
-        sharedPreferencesRepository = Creator.getSharedPreferencesRepository()
+
+        startKoin {
+            androidContext(this@App)
+            modules(dataModule, repositoryModule, interactorModule, viewModelModule)
+        }
+
         darkTheme = getAppTheme()
         switchTheme(darkTheme)
     }

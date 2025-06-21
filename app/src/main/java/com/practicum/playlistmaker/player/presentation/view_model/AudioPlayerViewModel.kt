@@ -4,14 +4,15 @@ import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
+import com.practicum.playlistmaker.core.domain.models.Track
 import com.practicum.playlistmaker.player.domain.api.PlayerInteractor
 import com.practicum.playlistmaker.player.presentation.PlayerState
+import com.practicum.playlistmaker.search.domain.api.SearchHistoryInteractor
 
-class AudioPlayerViewModel(private val player: PlayerInteractor, private val url: String) :
-    ViewModel() {
+class AudioPlayerViewModel(
+    private val player: PlayerInteractor,
+    private val searchHistory: SearchHistoryInteractor
+) : ViewModel() {
 
     companion object {
         private const val STATE_DEFAULT = 0
@@ -19,9 +20,12 @@ class AudioPlayerViewModel(private val player: PlayerInteractor, private val url
         private const val STATE_PLAYING = 2
         private const val STATE_PAUSED = 3
         private const val REFRESH_SECONDS_VALUE_MILLIS = 200L
+    }
 
-        fun factory(player: PlayerInteractor, trackUrl: String): ViewModelProvider.Factory =
-            viewModelFactory { initializer { AudioPlayerViewModel(player, trackUrl) } }
+    private lateinit var track: Track
+
+    init {
+        preparePlayer()
     }
 
     private var mainThreadHandler = android.os.Handler(Looper.getMainLooper())
@@ -33,6 +37,7 @@ class AudioPlayerViewModel(private val player: PlayerInteractor, private val url
 
     private val state = MutableLiveData(
         PlayerState(
+            track,
             state = STATE_DEFAULT,
             timer = player.resetTimer(),
             isPlayButtonEnabled = false,
@@ -41,10 +46,6 @@ class AudioPlayerViewModel(private val player: PlayerInteractor, private val url
     )
 
     fun getState(): LiveData<PlayerState> = state
-
-    init {
-        preparePlayer()
-    }
 
     fun changeLickedButtonStyle() {
         if (state.value?.isTrackLicked == false) {
@@ -76,7 +77,8 @@ class AudioPlayerViewModel(private val player: PlayerInteractor, private val url
     }
 
     private fun preparePlayer() {
-        player.prepare(url)
+        track = searchHistory.getListeningTrack()!!
+        player.prepare(track.previewUrl)
         player.getMediaPlayer().setOnPreparedListener {
             state.value = state.value?.copy(isPlayButtonEnabled = true)
             renderState(STATE_PREPARED)
