@@ -1,15 +1,14 @@
 package com.practicum.playlistmaker.search.domain.impl
 
-import com.practicum.playlistmaker.core.domain.api.DataMapperRepository
+import com.practicum.playlistmaker.core.domain.api.DataMapper
 import com.practicum.playlistmaker.search.domain.api.SearchHistoryInteractor
 import com.practicum.playlistmaker.core.domain.api.SharedPreferencesRepository
 import com.practicum.playlistmaker.core.domain.models.Track
 
 class SearchHistoryImpl(
     private val sharedPreferencesRepository: SharedPreferencesRepository,
-    private val dataMapper: DataMapperRepository
-) :
-    SearchHistoryInteractor {
+    private val dataMapper: DataMapper
+) : SearchHistoryInteractor {
 
     companion object {
         private const val TRACK_ID = "TRACK_ID"
@@ -35,8 +34,7 @@ class SearchHistoryImpl(
         }
         sharedPreferencesRepository.removeItem(TRACK_ID)
         sharedPreferencesRepository.putStrItem(
-            TRACK_ID,
-            dataMapper.createJsonFromTracks(storyTracks.toTypedArray())
+            TRACK_ID, dataMapper.createJsonFromTracks(storyTracks.toTypedArray())
         )
     }
 

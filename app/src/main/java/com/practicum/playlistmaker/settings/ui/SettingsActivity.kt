@@ -2,22 +2,15 @@ package com.practicum.playlistmaker.settings.ui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
-import com.practicum.playlistmaker.core.creator.Creator
 import com.practicum.playlistmaker.databinding.ActivitySettingsBinding
 import com.practicum.playlistmaker.settings.presentation.view_model.SettingsViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySettingsBinding
 
-    private val viewModel by lazy {
-        ViewModelProvider(
-            this, SettingsViewModel.factory(
-                Creator.provideSettingsInteractor(), Creator.provideSharingInteractor(this)
-            )
-        )[SettingsViewModel::class.java]
-    }
+    private val viewModel: SettingsViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
