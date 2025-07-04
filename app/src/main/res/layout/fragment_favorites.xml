@@ -15,10 +15,12 @@
             android:layout_width="120dp"
             android:layout_height="120dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="106dp" />
+            android:layout_marginTop="106dp"
+            android:src="@drawable/nothing_found" />
 
         <TextView
             android:id="@+id/placeholderText"
-            style="@style/PlaceholderText" />
+            style="@style/PlaceholderText"
+            android:text="@string/favorites_is_empty" />
     </LinearLayout>
 </LinearLayout>

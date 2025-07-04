@@ -20,8 +20,11 @@
         style="@style/TabLayout"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_48dp"
+        android:textSize="14sp"
         app:tabIndicator="@drawable/tab_indicator"
-        app:tabMode="fixed" />
+        app:tabMode="fixed"
+        app:tabTextAppearance="@android:style/TextAppearance.Widget.TabWidget"
+        app:textAllCaps="false" />
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPager"
