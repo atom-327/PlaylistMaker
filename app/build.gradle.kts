@@ -43,28 +43,27 @@ android {
 dependencies {
 
     dependencies {
-        implementation(libs.moxy)
-        implementation(libs.moxy.android)
         kapt(libs.moxy.compiler)
 
-        implementation(libs.androidx.core.ktx)
+        implementation(libs.navigation.fragment)
+        implementation(libs.navigation.ui)
         implementation(libs.androidx.fragment.ktx)
+        implementation(libs.moxy)
+        implementation(libs.moxy.android)
+        implementation(libs.androidx.core.ktx)
         implementation(libs.androidx.viewpager2)
         implementation(libs.androidx.viewbinding)
         implementation(libs.androidx.appcompat)
         implementation(libs.androidx.activity)
         implementation(libs.androidx.constraintlayout)
-
         implementation(libs.material)
-
         implementation(libs.retrofit)
         implementation(libs.retrofit.gson)
         implementation(libs.gson)
-
         implementation(libs.glide)
-        annotationProcessor(libs.glide.compiler)
-
         implementation(libs.koin.android)
+
+        annotationProcessor(libs.glide.compiler)
 
         testImplementation(libs.junit)
         androidTestImplementation(libs.androidx.junit)

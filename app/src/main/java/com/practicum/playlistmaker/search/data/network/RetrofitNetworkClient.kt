@@ -8,8 +8,7 @@ import com.practicum.playlistmaker.search.data.dto.ITunesRequest
 import com.practicum.playlistmaker.search.data.dto.Response
 
 class RetrofitNetworkClient(
-    private val context: Context,
-    private val itunesService: ITunesAPI
+    private val context: Context, private val itunesService: ITunesAPI
 ) : NetworkClient {
 
     override fun doRequest(dto: Any): Response {

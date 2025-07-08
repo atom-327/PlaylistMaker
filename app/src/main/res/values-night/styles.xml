@@ -149,4 +149,8 @@
         <item name="tabTextColor">@color/white</item>
     </style>
 
+    <style name="AppBottomNavigationTheme" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="itemIconTint">@drawable/bottom_nav_selector_dark</item>
+        <item name="itemTextColor">@drawable/bottom_nav_selector_dark</item>
+    </style>
 </resources>
