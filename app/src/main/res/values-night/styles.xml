@@ -144,4 +144,9 @@
         <item name="android:textSize">13sp</item>
     </style>
 
+    <style name="TabLayout" parent="Widget.Design.TabLayout">
+        <item name="tabIndicatorColor">@color/white</item>
+        <item name="tabTextColor">@color/white</item>
+    </style>
+
 </resources>
