@@ -63,10 +63,4 @@ class SettingsFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-//
-//    companion object {
-//        const val TAG = "SettingsFragment"
-//
-//        fun newInstance() = SettingsFragment()
-//    }
 }

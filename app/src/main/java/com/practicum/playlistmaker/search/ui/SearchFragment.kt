@@ -112,6 +112,7 @@ class SearchFragment : Fragment() {
                 hideSoftKeyboard(it)
                 tracks.clear()
                 tracksAdapter.notifyDataSetChanged()
+                viewModel.clearSearch()
             }
 
             clearStoryTracksButton.setOnClickListener {

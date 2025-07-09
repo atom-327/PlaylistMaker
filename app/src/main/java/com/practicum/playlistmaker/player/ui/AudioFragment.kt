@@ -68,8 +68,8 @@ class AudioFragment : Fragment() {
 
     private fun setupObservers() {
         viewModel.getState().observe(viewLifecycleOwner) {
-            if (track != it.track) {
-                setupTrackInfo(it.track!!, this)
+            if (track != it.track && it.track != null) {
+                setupTrackInfo(it.track, this)
                 track = it.track
             }
             if (state != it.state) {
