@@ -1,40 +1,35 @@
 package com.practicum.playlistmaker.search.ui
 
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.practicum.playlistmaker.R
-import com.practicum.playlistmaker.databinding.ActivitySearchBinding
 import com.practicum.playlistmaker.core.domain.models.Track
-import com.practicum.playlistmaker.player.ui.AudioPlayer
+import com.practicum.playlistmaker.databinding.FragmentSearchBinding
 import com.practicum.playlistmaker.search.presentation.TracksState
 import com.practicum.playlistmaker.search.presentation.view_model.SearchViewModel
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.androidx.viewmodel.ext.android.getViewModel
 import org.koin.core.parameter.parametersOf
 
-class SearchActivity : AppCompatActivity() {
+class SearchFragment : Fragment() {
 
-    companion object {
-        private const val TRACK_ID = "TRACK_ID"
-        private const val TEXT_KEY = "TEXT_KEY"
-    }
-
-    private lateinit var binding: ActivitySearchBinding
+    private var _binding: FragmentSearchBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var errorMessage: String
     private lateinit var emptyMessage: String
 
-    private val viewModel: SearchViewModel by viewModel {
-        parametersOf(errorMessage, emptyMessage)
-    }
+    private lateinit var viewModel: SearchViewModel
 
     private lateinit var listener: SharedPreferences.OnSharedPreferenceChangeListener
     private lateinit var tracksAdapter: TrackListAdapter
@@ -43,13 +38,22 @@ class SearchActivity : AppCompatActivity() {
     private val tracks = mutableListOf<Track>()
     private val storyList = mutableListOf<Track>()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivitySearchBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentSearchBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         errorMessage = getString(R.string.something_went_wrong)
         emptyMessage = getString(R.string.nothing_found)
+
+        viewModel = getViewModel {
+            parametersOf(errorMessage, emptyMessage)
+        }
 
         if (savedInstanceState != null) {
             viewModel.changedText = savedInstanceState.getString(TEXT_KEY, "")
@@ -72,13 +76,6 @@ class SearchActivity : AppCompatActivity() {
         with(binding) {
             updateButton.visibility = View.GONE
             storyTracks.visibility = View.GONE
-
-            toolbarButton.setNavigationOnClickListener {
-                finish()
-                overridePendingTransition(
-                    android.R.anim.slide_in_left, android.R.anim.slide_out_right
-                )
-            }
 
             searchEditText.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(
@@ -115,6 +112,7 @@ class SearchActivity : AppCompatActivity() {
                 hideSoftKeyboard(it)
                 tracks.clear()
                 tracksAdapter.notifyDataSetChanged()
+                viewModel.clearSearch()
             }
 
             clearStoryTracksButton.setOnClickListener {
@@ -135,26 +133,26 @@ class SearchActivity : AppCompatActivity() {
         tracksAdapter = TrackListAdapter(tracks) { track ->
             if (viewModel.clickDebounce()) {
                 viewModel.addTrack(storyList, track)
-                val audioPlayerIntent = Intent(this, AudioPlayer::class.java)
-                startActivity(audioPlayerIntent)
+                findNavController().navigate(R.id.action_searchFragment_to_audioFragment)
             }
         }
-        binding.rvTrackList.layoutManager = LinearLayoutManager(this@SearchActivity)
+        binding.rvTrackList.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         binding.rvTrackList.adapter = tracksAdapter
 
         storyTracksAdapter = TrackListAdapter(storyList) { track ->
             if (viewModel.clickDebounce()) {
                 viewModel.addTrack(storyList, track)
-                val audioPlayerIntent = Intent(this, AudioPlayer::class.java)
-                startActivity(audioPlayerIntent)
+                findNavController().navigate(R.id.action_searchFragment_to_audioFragment)
             }
         }
-        binding.storyTrackList.layoutManager = LinearLayoutManager(this@SearchActivity)
+        binding.storyTrackList.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         binding.storyTrackList.adapter = storyTracksAdapter
     }
 
     private fun setupObservers() {
-        viewModel.getState().observe(this) { state ->
+        viewModel.getState().observe(viewLifecycleOwner) { state ->
             render(state)
         }
     }
@@ -232,7 +230,18 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun hideSoftKeyboard(view: View) {
-        val manager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val manager =
+            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         manager.hideSoftInputFromWindow(view.windowToken, 0)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    companion object {
+        private const val TRACK_ID = "TRACK_ID"
+        private const val TEXT_KEY = "TEXT_KEY"
     }
 }

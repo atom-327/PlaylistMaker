@@ -2,37 +2,48 @@ package com.practicum.playlistmaker.player.ui
 
 import android.os.Bundle
 import android.util.TypedValue
-import androidx.appcompat.app.AppCompatActivity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.practicum.playlistmaker.R
-import com.practicum.playlistmaker.databinding.AudioPlayerBinding
 import com.practicum.playlistmaker.core.domain.models.Track
-import com.practicum.playlistmaker.player.presentation.view_model.AudioPlayerViewModel
 import com.practicum.playlistmaker.core.ui.App
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
+import com.practicum.playlistmaker.databinding.FragmentAudioBinding
+import com.practicum.playlistmaker.player.presentation.view_model.AudioPlayerViewModel
+import org.koin.androidx.viewmodel.ext.android.getViewModel
 
-class AudioPlayer : AppCompatActivity() {
+class AudioFragment : Fragment() {
 
-    private lateinit var binding: AudioPlayerBinding
+    private var _binding: FragmentAudioBinding? = null
+    private val binding get() = _binding!!
 
     private var darkTheme: Boolean = false
     private var track: Track? = null
     private var state = -1
     private var isTrackLicked = false
 
-    private val viewModel: AudioPlayerViewModel by viewModel {
-        parametersOf()
+    private lateinit var viewModel: AudioPlayerViewModel
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
+        _binding = FragmentAudioBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = AudioPlayerBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        darkTheme = (applicationContext as App).getAppTheme()
+        viewModel = getViewModel()
+
+        darkTheme = (requireContext().applicationContext as App).getAppTheme()
 
         setupViews()
         setupObservers()
@@ -40,11 +51,9 @@ class AudioPlayer : AppCompatActivity() {
 
     private fun setupViews() {
         with(binding) {
+
             searchButton.setNavigationOnClickListener {
-                finish()
-                overridePendingTransition(
-                    android.R.anim.slide_in_left, android.R.anim.slide_out_right
-                )
+                findNavController().navigateUp()
             }
 
             playTrackButton.setOnClickListener {
@@ -58,8 +67,8 @@ class AudioPlayer : AppCompatActivity() {
     }
 
     private fun setupObservers() {
-        viewModel.getState().observe(this) {
-            if (track != it.track) {
+        viewModel.getState().observe(viewLifecycleOwner) {
+            if (track != it.track && it.track != null) {
                 setupTrackInfo(it.track, this)
                 track = it.track
             }
@@ -76,7 +85,7 @@ class AudioPlayer : AppCompatActivity() {
         }
     }
 
-    private fun setupTrackInfo(track: Track, audioPlayer: AudioPlayer) {
+    private fun setupTrackInfo(track: Track, audioPlayer: AudioFragment) {
         with(binding) {
             Glide.with(audioPlayer).load(track.getCoverArtwork())
                 .placeholder(R.drawable.track_icon_placeholder).centerCrop().transform(
@@ -101,9 +110,10 @@ class AudioPlayer : AppCompatActivity() {
         viewModel.onPause()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         viewModel.onDestroy()
+        _binding = null
     }
 
     private fun render(state: Int) {

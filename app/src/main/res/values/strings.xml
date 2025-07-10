@@ -15,6 +15,7 @@
     <string name="agreementLink">https://yandex.ru/legal/practicum_offer/</string>
     <string name="trackInfo">%1$s • %2$s</string>
     <string name="something_went_wrong">Проблемы со связью\n\nЗагрузка не удалась. Проверьте подключение к интернету</string>
+    <string name="server_error">Ошибка сервера</string>
     <string name="nothing_found">Ничего не нашлось</string>
     <string name="story_tracks">Вы искали</string>
     <string name="clear_story">Очистить историю</string>

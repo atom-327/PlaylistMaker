@@ -10,8 +10,7 @@ import com.practicum.playlistmaker.player.presentation.PlayerState
 import com.practicum.playlistmaker.search.domain.api.SearchHistoryInteractor
 
 class AudioPlayerViewModel(
-    private val player: PlayerInteractor,
-    private val searchHistory: SearchHistoryInteractor
+    private val player: PlayerInteractor, private val searchHistory: SearchHistoryInteractor
 ) : ViewModel() {
 
     companion object {

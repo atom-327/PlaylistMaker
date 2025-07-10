@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context="com.practicum.playlistmaker.settings.ui.SettingsFragment">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbarButton"
+    <TextView
+        style="@style/TopTextStyle"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
-        android:theme="@style/Theme.Toolbar"
-        app:title="@string/settings"
-        app:titleTextAppearance="@style/TopTextStyle">
-
-    </androidx.appcompat.widget.Toolbar>
+        android:layout_height="56dp"
+        android:gravity="center_vertical"
+        android:paddingLeft="@dimen/_16dp"
+        android:text="@string/settings" />
 
     <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/switchThemeButton"

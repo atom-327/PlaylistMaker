@@ -92,6 +92,11 @@ class SearchViewModel(
         }
     }
 
+    fun clearSearch() {
+        changedText = ""
+        renderState(TracksState.Content(emptyList()))
+    }
+
     private fun renderState(state: TracksState) {
         this.state.postValue(state)
     }
