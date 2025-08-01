@@ -18,15 +18,12 @@ import com.practicum.playlistmaker.player.presentation.view_model.AudioPlayerVie
 import org.koin.androidx.viewmodel.ext.android.getViewModel
 
 class AudioFragment : Fragment() {
-
     private var _binding: FragmentAudioBinding? = null
     private val binding get() = _binding!!
-
     private var darkTheme: Boolean = false
     private var track: Track? = null
     private var state = -1
     private var isTrackLicked = false
-
     private lateinit var viewModel: AudioPlayerViewModel
 
     override fun onCreateView(
@@ -112,7 +109,6 @@ class AudioFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        viewModel.onDestroy()
         _binding = null
     }
 

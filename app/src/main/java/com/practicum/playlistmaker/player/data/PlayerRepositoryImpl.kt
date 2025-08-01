@@ -12,6 +12,10 @@ class PlayerRepositoryImpl(private val mediaPlayer: MediaPlayer) : PlayerReposit
         mediaPlayer.pause()
     }
 
+    override fun stop() {
+        mediaPlayer.stop()
+    }
+
     override fun prepare(trackUrl: String) {
         mediaPlayer.setDataSource(trackUrl)
         mediaPlayer.prepareAsync()

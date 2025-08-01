@@ -20,6 +20,10 @@ class PlayerInteractorImpl(
         playerRepository.pause()
     }
 
+    override fun stop() {
+        playerRepository.stop()
+    }
+
     override fun prepare(trackUrl: String) {
         playerRepository.prepare(trackUrl)
     }

@@ -1,16 +1,17 @@
 package com.practicum.playlistmaker.search.presentation.view_model
 
 import android.content.SharedPreferences
-import android.os.Handler
-import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.practicum.playlistmaker.core.domain.api.SharedPreferencesRepository
 import com.practicum.playlistmaker.core.domain.models.Track
+import com.practicum.playlistmaker.core.util.debounce
 import com.practicum.playlistmaker.search.presentation.TracksState
 import com.practicum.playlistmaker.search.domain.api.SearchHistoryInteractor
 import com.practicum.playlistmaker.search.domain.api.TracksInteractor
+import kotlinx.coroutines.launch
 
 class SearchViewModel(
     private val tracksInteractor: TracksInteractor,
@@ -21,39 +22,24 @@ class SearchViewModel(
 ) : ViewModel() {
 
     companion object {
-        private const val CLICK_DEBOUNCE_DELAY = 1_000L
         private const val SEARCH_DEBOUNCE_DELAY = 2_000L
         private const val TEXT_VALUE = ""
     }
 
-    private var isClickAllowed = true
     var changedText: String = TEXT_VALUE
-
-    private val handler = Handler(Looper.getMainLooper())
-    private val searchRunnable = Runnable { search() }
 
     private val state = MutableLiveData<TracksState>()
     fun getState(): LiveData<TracksState> = state
 
-    fun clickDebounce(): Boolean {
-        val current = isClickAllowed
-        if (isClickAllowed) {
-            isClickAllowed = false
-            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
+    private val trackSearchDebounce =
+        debounce<String>(SEARCH_DEBOUNCE_DELAY, viewModelScope, true) {
+            search()
         }
-        return current
-    }
 
     fun searchDebounce(changedText: String) {
-        if (this.changedText == changedText) {
-            return
-        }
-
-        this.changedText = changedText
-        onCleared()
-
-        if (changedText.isNotEmpty()) {
-            handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
+        if (this.changedText != changedText) {
+            this.changedText = changedText
+            trackSearchDebounce(changedText)
         }
     }
 
@@ -61,34 +47,38 @@ class SearchViewModel(
         if (changedText.isNotEmpty()) {
             renderState(TracksState.Loading)
 
-            tracksInteractor.searchTracks(changedText, object : TracksInteractor.TracksConsumer {
-                override fun consume(foundTracks: List<Track>?, errorMessage: String?) {
-                    val tracks = mutableListOf<Track>()
-                    if (foundTracks != null) {
-                        tracks.addAll(foundTracks)
+            viewModelScope.launch {
+                tracksInteractor.searchTracks(changedText).collect { pair ->
+                        processResult(pair.first, pair.second)
                     }
+            }
+        }
+    }
 
-                    when {
-                        errorMessage != null -> {
-                            renderState(
-                                TracksState.Error(
-                                    errorStr
-                                )
-                            )
-                        }
+    private fun processResult(foundTracks: List<Track>?, errorMessage: String?) {
+        val tracks = mutableListOf<Track>()
+        if (foundTracks != null) {
+            tracks.addAll(foundTracks)
+        }
 
-                        tracks.isEmpty() -> {
-                            renderState(
-                                TracksState.Empty(
-                                    emptyStr
-                                )
-                            )
-                        }
+        when {
+            errorMessage != null -> {
+                renderState(
+                    TracksState.Error(
+                        errorStr
+                    )
+                )
+            }
 
-                        else -> renderState(TracksState.Content(tracks))
-                    }
-                }
-            })
+            tracks.isEmpty() -> {
+                renderState(
+                    TracksState.Empty(
+                        emptyStr
+                    )
+                )
+            }
+
+            else -> renderState(TracksState.Content(tracks))
         }
     }
 
@@ -115,10 +105,5 @@ class SearchViewModel(
 
     fun registerOnSharedPreferenceChangeListener(listener: SharedPreferences.OnSharedPreferenceChangeListener) {
         sharedPreferencesRepository.registerOnSharedPreferenceChangeListener(listener)
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        handler.removeCallbacksAndMessages(searchRunnable)
     }
 }

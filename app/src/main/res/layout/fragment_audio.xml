@@ -44,7 +44,6 @@
             android:layout_height="wrap_content"
             android:theme="@style/Theme.Toolbar"
             app:titleTextAppearance="@style/TopTextStyle">
-
         </androidx.appcompat.widget.Toolbar>
 
         <ImageView
