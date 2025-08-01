@@ -1,13 +1,16 @@
 package com.practicum.playlistmaker.player.presentation.view_model
 
-import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.practicum.playlistmaker.core.domain.models.Track
 import com.practicum.playlistmaker.player.domain.api.PlayerInteractor
 import com.practicum.playlistmaker.player.presentation.PlayerState
 import com.practicum.playlistmaker.search.domain.api.SearchHistoryInteractor
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class AudioPlayerViewModel(
     private val player: PlayerInteractor, private val searchHistory: SearchHistoryInteractor
@@ -18,20 +21,14 @@ class AudioPlayerViewModel(
         private const val STATE_PREPARED = 1
         private const val STATE_PLAYING = 2
         private const val STATE_PAUSED = 3
-        private const val REFRESH_SECONDS_VALUE_MILLIS = 200L
+        private const val REFRESH_SECONDS_VALUE_MILLIS = 300L
     }
 
+    private var timerJob: Job? = null
     private lateinit var track: Track
 
     init {
         preparePlayer()
-    }
-
-    private var mainThreadHandler = android.os.Handler(Looper.getMainLooper())
-    private val timerRunnable = Runnable {
-        if (state.value?.state == STATE_PLAYING) {
-            startTimerUpdate()
-        }
     }
 
     private val state = MutableLiveData(
@@ -56,16 +53,9 @@ class AudioPlayerViewModel(
         pausePlayer()
     }
 
-    fun onDestroy() {
-        player.release()
-        player.resetTimer()
-    }
-
     override fun onCleared() {
         super.onCleared()
-        player.release()
-        player.resetTimer()
-        mainThreadHandler.removeCallbacks(timerRunnable)
+        releasePlayer()
     }
 
     fun playbackControl() {
@@ -83,8 +73,8 @@ class AudioPlayerViewModel(
             renderState(STATE_PREPARED)
         }
         player.getMediaPlayer().setOnCompletionListener {
+            timerJob?.cancel()
             renderState(STATE_PREPARED)
-            mainThreadHandler.removeCallbacks(timerRunnable)
             state.value = state.value?.copy(timer = player.resetTimer())
         }
     }
@@ -96,14 +86,25 @@ class AudioPlayerViewModel(
     }
 
     private fun pausePlayer() {
-        mainThreadHandler.removeCallbacks(timerRunnable)
         player.pause()
+        timerJob?.cancel()
         renderState(STATE_PAUSED)
     }
 
+    private fun releasePlayer() {
+        player.stop()
+        player.release()
+        state.value = state.value?.copy(timer = player.resetTimer())
+        renderState(STATE_DEFAULT)
+    }
+
     private fun startTimerUpdate() {
-        state.value = state.value?.copy(timer = player.getCurrentPosition())
-        mainThreadHandler.postDelayed(timerRunnable, REFRESH_SECONDS_VALUE_MILLIS)
+        timerJob = viewModelScope.launch {
+            while (state.value?.state == STATE_PLAYING) {
+                delay(REFRESH_SECONDS_VALUE_MILLIS)
+                state.value = state.value?.copy(timer = player.getCurrentPosition())
+            }
+        }
     }
 
     private fun renderState(state: Int) {

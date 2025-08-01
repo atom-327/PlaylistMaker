@@ -11,10 +11,13 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.core.domain.models.Track
+import com.practicum.playlistmaker.core.ui.root.RootActivity
+import com.practicum.playlistmaker.core.util.debounce
 import com.practicum.playlistmaker.databinding.FragmentSearchBinding
 import com.practicum.playlistmaker.search.presentation.TracksState
 import com.practicum.playlistmaker.search.presentation.view_model.SearchViewModel
@@ -22,19 +25,15 @@ import org.koin.androidx.viewmodel.ext.android.getViewModel
 import org.koin.core.parameter.parametersOf
 
 class SearchFragment : Fragment() {
-
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
-
     private lateinit var errorMessage: String
     private lateinit var emptyMessage: String
-
     private lateinit var viewModel: SearchViewModel
-
+    private lateinit var onMovieClickDebounce: (Track) -> Unit
     private lateinit var listener: SharedPreferences.OnSharedPreferenceChangeListener
     private lateinit var tracksAdapter: TrackListAdapter
     private lateinit var storyTracksAdapter: TrackListAdapter
-
     private val tracks = mutableListOf<Track>()
     private val storyList = mutableListOf<Track>()
 
@@ -53,6 +52,15 @@ class SearchFragment : Fragment() {
 
         viewModel = getViewModel {
             parametersOf(errorMessage, emptyMessage)
+        }
+
+        onMovieClickDebounce = debounce<Track>(
+            CLICK_DEBOUNCE_DELAY, viewLifecycleOwner.lifecycleScope, false
+        ) { track ->
+            viewModel.addTrack(storyList, track)
+            findNavController().navigate(
+                R.id.action_searchFragment_to_audioFragment,
+            )
         }
 
         if (savedInstanceState != null) {
@@ -101,7 +109,7 @@ class SearchFragment : Fragment() {
                 if (hasFocus && searchEditText.text.isEmpty()) {
                     viewModel.loadTracks(storyList)
                     storyTracksAdapter.notifyDataSetChanged()
-                    if (storyList.size != 0) {
+                    if (storyList.isNotEmpty()) {
                         showHistory()
                     }
                 }
@@ -131,20 +139,16 @@ class SearchFragment : Fragment() {
 
     private fun setupRecyclerView() {
         tracksAdapter = TrackListAdapter(tracks) { track ->
-            if (viewModel.clickDebounce()) {
-                viewModel.addTrack(storyList, track)
-                findNavController().navigate(R.id.action_searchFragment_to_audioFragment)
-            }
+            (activity as RootActivity).animateBottomNavigationView()
+            onMovieClickDebounce(track)
         }
         binding.rvTrackList.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         binding.rvTrackList.adapter = tracksAdapter
 
         storyTracksAdapter = TrackListAdapter(storyList) { track ->
-            if (viewModel.clickDebounce()) {
-                viewModel.addTrack(storyList, track)
-                findNavController().navigate(R.id.action_searchFragment_to_audioFragment)
-            }
+            (activity as RootActivity).animateBottomNavigationView()
+            onMovieClickDebounce(track)
         }
         binding.storyTrackList.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
@@ -241,6 +245,7 @@ class SearchFragment : Fragment() {
     }
 
     companion object {
+        private const val CLICK_DEBOUNCE_DELAY = 1_000L
         private const val TRACK_ID = "TRACK_ID"
         private const val TEXT_KEY = "TEXT_KEY"
     }

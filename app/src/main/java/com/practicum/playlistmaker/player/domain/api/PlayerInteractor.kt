@@ -5,6 +5,7 @@ import android.media.MediaPlayer
 interface PlayerInteractor {
     fun play()
     fun pause()
+    fun stop()
     fun prepare(trackUrl: String)
     fun release()
     fun getCurrentPosition(): String?
