@@ -4,6 +4,9 @@ import com.practicum.playlistmaker.core.data.SharedPreferencesRepositoryImpl
 import com.practicum.playlistmaker.core.data.mapper.DataMapperImpl
 import com.practicum.playlistmaker.core.domain.api.DataMapper
 import com.practicum.playlistmaker.core.domain.api.SharedPreferencesRepository
+import com.practicum.playlistmaker.media.data.FavouritesRepositoryImpl
+import com.practicum.playlistmaker.db.data.mapper.TrackDbConvertor
+import com.practicum.playlistmaker.media.domain.api.FavouritesRepository
 import com.practicum.playlistmaker.player.data.PlayerRepositoryImpl
 import com.practicum.playlistmaker.player.domain.api.PlayerRepository
 import com.practicum.playlistmaker.search.data.TracksRepositoryImpl
@@ -25,7 +28,7 @@ val repositoryModule = module {
     }
 
     factory<TracksRepository> {
-        TracksRepositoryImpl(get())
+        TracksRepositoryImpl(get(), get(), get())
     }
 
     factory<PlayerRepository> {
@@ -38,5 +41,11 @@ val repositoryModule = module {
 
     factory<ExternalNavigator> {
         ExternalNavigatorImpl(androidContext())
+    }
+
+    factory { TrackDbConvertor() }
+
+    single<FavouritesRepository> {
+        FavouritesRepositoryImpl(get(), get())
     }
 }

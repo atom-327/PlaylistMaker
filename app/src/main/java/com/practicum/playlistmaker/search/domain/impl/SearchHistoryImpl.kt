@@ -4,10 +4,13 @@ import com.practicum.playlistmaker.core.domain.api.DataMapper
 import com.practicum.playlistmaker.search.domain.api.SearchHistoryInteractor
 import com.practicum.playlistmaker.core.domain.api.SharedPreferencesRepository
 import com.practicum.playlistmaker.core.domain.models.Track
+import com.practicum.playlistmaker.search.domain.api.TracksRepository
+import kotlinx.coroutines.flow.Flow
 
 class SearchHistoryImpl(
     private val sharedPreferencesRepository: SharedPreferencesRepository,
-    private val dataMapper: DataMapper
+    private val dataMapper: DataMapper,
+    private val tracksRepository: TracksRepository
 ) : SearchHistoryInteractor {
 
     companion object {
@@ -15,12 +18,11 @@ class SearchHistoryImpl(
         private const val STORY_SIZE = 10
     }
 
-    override fun loadTracks(storyTracks: MutableList<Track>) {
+    override fun loadTracks(storyTracks: MutableList<Track>): Flow<List<Track>> {
         val track = sharedPreferencesRepository.getStrItem(TRACK_ID)
-        if (track != null) {
-            storyTracks.clear()
-            storyTracks.addAll(dataMapper.createTracksFromJson(track))
-        }
+        return if (track != null) {
+            tracksRepository.loadHistoryTracks(track)
+        } else emptyList<Track>() as Flow<List<Track>>
     }
 
     override fun addTrack(storyTracks: MutableList<Track>, track: Track) {

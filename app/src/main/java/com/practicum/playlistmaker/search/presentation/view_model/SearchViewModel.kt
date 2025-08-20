@@ -49,8 +49,8 @@ class SearchViewModel(
 
             viewModelScope.launch {
                 tracksInteractor.searchTracks(changedText).collect { pair ->
-                        processResult(pair.first, pair.second)
-                    }
+                    processResult(pair.first, pair.second)
+                }
             }
         }
     }
@@ -92,7 +92,9 @@ class SearchViewModel(
     }
 
     fun loadTracks(tracks: MutableList<Track>) {
-        searchHistory.loadTracks(tracks)
+        viewModelScope.launch {
+            searchHistory.loadTracks(tracks)
+        }
     }
 
     fun clearHistory(tracks: MutableList<Track>) {

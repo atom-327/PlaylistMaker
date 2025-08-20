@@ -25,6 +25,7 @@ import org.koin.androidx.viewmodel.ext.android.getViewModel
 import org.koin.core.parameter.parametersOf
 
 class SearchFragment : Fragment() {
+
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
     private lateinit var errorMessage: String
@@ -82,8 +83,8 @@ class SearchFragment : Fragment() {
 
     private fun setupViews() {
         with(binding) {
-            updateButton.visibility = View.GONE
-            storyTracks.visibility = View.GONE
+            updateButton.isVisible = false
+            storyTracks.isVisible = false
 
             searchEditText.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(
@@ -98,7 +99,7 @@ class SearchFragment : Fragment() {
                     if (searchEditText.hasFocus() && s?.isEmpty() == true && storyList.isNotEmpty()) {
                         showHistory()
                     } else {
-                        storyTracks.visibility = View.GONE
+                        storyTracks.isVisible = false
                     }
                 }
 
@@ -126,7 +127,7 @@ class SearchFragment : Fragment() {
             clearStoryTracksButton.setOnClickListener {
                 viewModel.clearHistory(storyList)
                 storyTracksAdapter.notifyDataSetChanged()
-                storyTracks.visibility = View.GONE
+                storyTracks.isVisible = false
             }
 
             updateButton.setOnClickListener {
@@ -165,8 +166,8 @@ class SearchFragment : Fragment() {
         this.tracks.clear()
         tracksAdapter.notifyDataSetChanged()
         with(binding) {
-            placeholderMessage.visibility = View.GONE
-            storyTracks.visibility = View.VISIBLE
+            placeholderMessage.isVisible = false
+            storyTracks.isVisible = true
         }
     }
 
@@ -181,19 +182,19 @@ class SearchFragment : Fragment() {
 
     private fun showLoading() {
         with(binding) {
-            rvTrackList.visibility = View.GONE
-            placeholderMessage.visibility = View.GONE
-            storyTracks.visibility = View.GONE
-            progressBar.visibility = View.VISIBLE
+            rvTrackList.isVisible = false
+            placeholderMessage.isVisible = false
+            storyTracks.isVisible = false
+            progressBar.isVisible = true
         }
     }
 
     private fun showContent(tracks: List<Track>) {
         with(binding) {
-            rvTrackList.visibility = View.VISIBLE
-            placeholderMessage.visibility = View.GONE
-            storyTracks.visibility = View.GONE
-            progressBar.visibility = View.GONE
+            rvTrackList.isVisible = true
+            placeholderMessage.isVisible = false
+            storyTracks.isVisible = false
+            progressBar.isVisible = false
         }
         this.tracks.clear()
         this.tracks.addAll(tracks)
@@ -202,29 +203,29 @@ class SearchFragment : Fragment() {
 
     private fun showEmpty(emptyMessage: String) {
         with(binding) {
-            rvTrackList.visibility = View.GONE
-            placeholderMessage.visibility = View.VISIBLE
-            storyTracks.visibility = View.GONE
-            progressBar.visibility = View.GONE
+            rvTrackList.isVisible = false
+            placeholderMessage.isVisible = true
+            storyTracks.isVisible = false
+            progressBar.isVisible = false
             tracks.clear()
             tracksAdapter.notifyDataSetChanged()
             placeholderText.text = emptyMessage
             placeholderImage.setImageResource(R.drawable.nothing_found)
-            updateButton.visibility = View.GONE
+            updateButton.isVisible = false
         }
     }
 
     private fun showError(errorMessage: String) {
         with(binding) {
-            rvTrackList.visibility = View.GONE
-            placeholderMessage.visibility = View.VISIBLE
-            storyTracks.visibility = View.GONE
-            progressBar.visibility = View.GONE
+            rvTrackList.isVisible = false
+            placeholderMessage.isVisible = true
+            storyTracks.isVisible = false
+            progressBar.isVisible = false
             tracks.clear()
             tracksAdapter.notifyDataSetChanged()
             placeholderText.text = errorMessage
             placeholderImage.setImageResource(R.drawable.something_went_wrong)
-            updateButton.visibility = View.VISIBLE
+            updateButton.isVisible = true
         }
     }
 

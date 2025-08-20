@@ -15,7 +15,6 @@ class TrackDto(
     val country: String,
     val previewUrl: String
 ) {
-
     fun getTrackTime(): String {
         val dateFormat by lazy { SimpleDateFormat("mm:ss", Locale.getDefault()) }
         return dateFormat.format(trackTimeMillis.toLong())
