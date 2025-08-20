@@ -31,10 +31,12 @@ android {
             )
         }
     }
+    
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = "1.8"
     }
@@ -45,6 +47,7 @@ dependencies {
     dependencies {
         kapt(libs.moxy.compiler)
 
+        implementation(libs.kotlinx.coroutines.android)
         implementation(libs.navigation.fragment)
         implementation(libs.navigation.ui)
         implementation(libs.androidx.fragment.ktx)
