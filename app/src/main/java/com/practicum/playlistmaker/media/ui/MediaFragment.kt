@@ -13,7 +13,6 @@ class MediaFragment : Fragment() {
 
     private var _binding: FragmentMediaBinding? = null
     private val binding get() = _binding!!
-
     private lateinit var tabMediator: TabLayoutMediator
 
     override fun onCreateView(

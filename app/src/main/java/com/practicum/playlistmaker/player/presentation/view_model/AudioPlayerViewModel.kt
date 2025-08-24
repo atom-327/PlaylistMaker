@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.practicum.playlistmaker.core.domain.models.Track
+import com.practicum.playlistmaker.media.domain.api.FavouritesInteractor
 import com.practicum.playlistmaker.player.domain.api.PlayerInteractor
 import com.practicum.playlistmaker.player.presentation.PlayerState
 import com.practicum.playlistmaker.search.domain.api.SearchHistoryInteractor
@@ -13,7 +14,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class AudioPlayerViewModel(
-    private val player: PlayerInteractor, private val searchHistory: SearchHistoryInteractor
+    private val player: PlayerInteractor,
+    private val searchHistory: SearchHistoryInteractor,
+    private val favouritesInteractor: FavouritesInteractor
 ) : ViewModel() {
 
     companion object {
@@ -33,20 +36,30 @@ class AudioPlayerViewModel(
 
     private val state = MutableLiveData(
         PlayerState(
-            track,
+            track = track,
             state = STATE_DEFAULT,
             timer = player.resetTimer(),
             isPlayButtonEnabled = false,
-            isTrackLicked = false
+            isTrackLicked = track.isFavorite
         )
     )
 
     fun getState(): LiveData<PlayerState> = state
 
-    fun changeLickedButtonStyle() {
-        if (state.value?.isTrackLicked == false) {
-            state.value = state.value?.copy(isTrackLicked = true)
-        } else state.value = state.value?.copy(isTrackLicked = false)
+    fun onFavouriteClicked() {
+        viewModelScope.launch {
+            if (track.isFavorite) {
+                favouritesInteractor.deleteTrack(track)
+                changeLickedButtonStyle(false)
+            } else {
+                favouritesInteractor.addTrack(track)
+                changeLickedButtonStyle(true)
+            }
+        }
+    }
+
+    private fun changeLickedButtonStyle(isFavorite: Boolean) {
+        state.value = state.value?.copy(isTrackLicked = isFavorite)
     }
 
     fun onPause() {
@@ -99,6 +112,7 @@ class AudioPlayerViewModel(
     }
 
     private fun startTimerUpdate() {
+        timerJob?.cancel()
         timerJob = viewModelScope.launch {
             while (state.value?.state == STATE_PLAYING) {
                 delay(REFRESH_SECONDS_VALUE_MILLIS)

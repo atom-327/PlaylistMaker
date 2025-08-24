@@ -1,8 +1,8 @@
 package com.practicum.playlistmaker.core.ui.root
 
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.practicum.playlistmaker.R
@@ -26,17 +26,17 @@ class RootActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
                 R.id.audioFragment -> {
-                    binding.bottomNavigationView.visibility = View.GONE
+                    binding.bottomNavigationView.isVisible = false
                 }
 
                 else -> {
-                    binding.bottomNavigationView.visibility = View.VISIBLE
+                    binding.bottomNavigationView.isVisible = true
                 }
             }
         }
     }
 
     fun animateBottomNavigationView() {
-        binding.bottomNavigationView.visibility = View.GONE
+        binding.bottomNavigationView.isVisible = false
     }
 }

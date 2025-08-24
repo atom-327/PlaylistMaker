@@ -49,8 +49,8 @@ class SearchViewModel(
 
             viewModelScope.launch {
                 tracksInteractor.searchTracks(changedText).collect { pair ->
-                        processResult(pair.first, pair.second)
-                    }
+                    processResult(pair.first, pair.second)
+                }
             }
         }
     }
@@ -100,7 +100,7 @@ class SearchViewModel(
     }
 
     fun addTrack(tracks: MutableList<Track>, track: Track) {
-        searchHistory.addTrack(tracks, track)
+        searchHistory.addTrack(track)
     }
 
     fun registerOnSharedPreferenceChangeListener(listener: SharedPreferences.OnSharedPreferenceChangeListener) {
