@@ -7,14 +7,20 @@ import androidx.lifecycle.viewModelScope
 import com.practicum.playlistmaker.core.domain.models.Track
 import com.practicum.playlistmaker.media.domain.api.FavouritesInteractor
 import com.practicum.playlistmaker.media.presentation.FavouritesState
+import com.practicum.playlistmaker.search.domain.api.SearchHistoryInteractor
 import kotlinx.coroutines.launch
 
 class FavouritesViewModel(
+    private val searchHistory: SearchHistoryInteractor,
     private val favouritesInteractor: FavouritesInteractor
 ) : ViewModel() {
 
     private val stateLiveData = MutableLiveData<FavouritesState>()
     fun observeState(): LiveData<FavouritesState> = stateLiveData
+
+    fun addTrack(track: Track) {
+        searchHistory.addTrack(track)
+    }
 
     fun fillData() {
         renderState(FavouritesState.Loading)

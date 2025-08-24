@@ -22,7 +22,10 @@ class FavouritesRepositoryImpl(
 
     override fun getTracks(): Flow<List<Track>> = flow {
         val tracks = appDatabase.trackDao().getTracks()
-        val sortedTracks = tracks.sortedByDescending { it.trackId }
+        val loadedTracks = tracks.map { loadedTrack ->
+            loadedTrack.copy(isFavorite = true)
+        }
+        val sortedTracks = loadedTracks.sortedByDescending { it.trackId }
         emit(convertFromTrackEntity(sortedTracks))
     }
 

@@ -92,9 +92,7 @@ class SearchViewModel(
     }
 
     fun loadTracks(tracks: MutableList<Track>) {
-        viewModelScope.launch {
-            searchHistory.loadTracks(tracks)
-        }
+        searchHistory.loadTracks(tracks)
     }
 
     fun clearHistory(tracks: MutableList<Track>) {
@@ -102,7 +100,7 @@ class SearchViewModel(
     }
 
     fun addTrack(tracks: MutableList<Track>, track: Track) {
-        searchHistory.addTrack(tracks, track)
+        searchHistory.addTrack(track)
     }
 
     fun registerOnSharedPreferenceChangeListener(listener: SharedPreferences.OnSharedPreferenceChangeListener) {

@@ -18,8 +18,8 @@ junit = "4.13.2"
 androidx-junit = "1.2.1"
 espresso-core = "3.6.1"
 agp = "8.11.1"
-kotlin = "2.2.0"
-room_version = "2.5.1"
+kotlin = "2.2.10"
+room_version = "2.7.2"
 
 [libraries]
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room_version" }

@@ -28,7 +28,7 @@ val repositoryModule = module {
     }
 
     factory<TracksRepository> {
-        TracksRepositoryImpl(get(), get(), get())
+        TracksRepositoryImpl(get(), get())
     }
 
     factory<PlayerRepository> {
