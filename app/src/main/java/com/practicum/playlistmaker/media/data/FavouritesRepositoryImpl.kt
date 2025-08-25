@@ -1,7 +1,7 @@
 package com.practicum.playlistmaker.media.data
 
 import com.practicum.playlistmaker.core.domain.models.Track
-import com.practicum.playlistmaker.db.data.AppDatabase
+import com.practicum.playlistmaker.db.data.dao.TrackDao
 import com.practicum.playlistmaker.db.data.entity.TrackEntity
 import com.practicum.playlistmaker.db.data.mapper.TrackDbConvertor
 import com.practicum.playlistmaker.media.domain.api.FavouritesRepository
@@ -9,24 +9,24 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 class FavouritesRepositoryImpl(
-    private val appDatabase: AppDatabase, private val trackDbConvertor: TrackDbConvertor
+    private val trackDao: TrackDao, private val trackDbConvertor: TrackDbConvertor
 ) : FavouritesRepository {
 
     override suspend fun addTrack(track: Track) {
-        appDatabase.trackDao().insertTrack(convertToTrackEntity(track))
+        val trackEntity = convertToTrackEntity(track).copy(
+            addedDate = System.currentTimeMillis()
+        )
+        trackDao.insertTrack(trackEntity)
     }
 
     override suspend fun deleteTrack(track: Track) {
-        appDatabase.trackDao().deleteTrack(convertToTrackEntity(track))
+        trackDao.deleteTrack(convertToTrackEntity(track))
     }
 
     override fun getTracks(): Flow<List<Track>> = flow {
-        val tracks = appDatabase.trackDao().getTracks()
-        val loadedTracks = tracks.map { loadedTrack ->
-            loadedTrack.copy(isFavorite = true)
-        }
-        val sortedTracks = loadedTracks.sortedByDescending { it.trackId }
-        emit(convertFromTrackEntity(sortedTracks))
+        val sortedTracks =
+            convertFromTrackEntity(trackDao.getTracks().sortedByDescending { it.addedDate })
+        emit(sortedTracks)
     }
 
     private fun convertToTrackEntity(track: Track): TrackEntity {

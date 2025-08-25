@@ -31,7 +31,9 @@ class AudioPlayerViewModel(
     private lateinit var track: Track
 
     init {
-        preparePlayer()
+        viewModelScope.launch {
+            preparePlayer()
+        }
     }
 
     private val state = MutableLiveData(
@@ -40,15 +42,15 @@ class AudioPlayerViewModel(
             state = STATE_DEFAULT,
             timer = player.resetTimer(),
             isPlayButtonEnabled = false,
-            isTrackLicked = track.isFavorite
+            isTrackLicked = false
         )
     )
 
-    fun getState(): LiveData<PlayerState> = state
+    fun getState(): LiveData<PlayerState?> = state
 
     fun onFavouriteClicked() {
         viewModelScope.launch {
-            if (track.isFavorite) {
+            if (state.value?.isTrackLicked == true) {
                 favouritesInteractor.deleteTrack(track)
                 changeLickedButtonStyle(false)
             } else {
@@ -56,6 +58,12 @@ class AudioPlayerViewModel(
                 changeLickedButtonStyle(true)
             }
         }
+    }
+
+    private suspend fun checkIfTrackIsFavorite() {
+        val favoriteTracks = player.getIdTracks()
+        val isFavorite = favoriteTracks.contains(track.trackId)
+        state.value = state.value?.copy(isTrackLicked = isFavorite)
     }
 
     private fun changeLickedButtonStyle(isFavorite: Boolean) {
@@ -78,9 +86,10 @@ class AudioPlayerViewModel(
         }
     }
 
-    private fun preparePlayer() {
+    private suspend fun preparePlayer() {
         track = searchHistory.getListeningTrack()!!
         player.prepare(track.previewUrl)
+        checkIfTrackIsFavorite()
         player.getMediaPlayer().setOnPreparedListener {
             state.value = state.value?.copy(isPlayButtonEnabled = true)
             renderState(STATE_PREPARED)

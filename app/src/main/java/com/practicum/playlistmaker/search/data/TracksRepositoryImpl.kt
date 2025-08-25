@@ -6,20 +6,17 @@ import com.practicum.playlistmaker.search.data.dto.ITunesRequest
 import com.practicum.playlistmaker.search.data.dto.ITunesResponse
 import com.practicum.playlistmaker.search.domain.api.TracksRepository
 import com.practicum.playlistmaker.core.util.Resource
-import com.practicum.playlistmaker.db.data.AppDatabase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 class TracksRepositoryImpl(
-    private val networkClient: NetworkClient,
-    private val appDatabase: AppDatabase,
+    private val networkClient: NetworkClient
 ) : TracksRepository {
     override fun searchTracks(expression: String): Flow<Resource<List<Track>>> = flow {
         val response = networkClient.doRequest(ITunesRequest(expression))
         when (response.resultCode) {
             -1 -> emit(Resource.Error(R.string.something_went_wrong.toString()))
             200 -> {
-                val favouriteTrackIds = appDatabase.trackDao().getIdTracks()
                 val tracks = (response as ITunesResponse).results.map {
                     Track(
                         it.trackId,
@@ -32,7 +29,7 @@ class TracksRepositoryImpl(
                         it.primaryGenreName,
                         it.country,
                         it.previewUrl,
-                        isFavorite = favouriteTrackIds.contains(it.trackId)
+                        isFavorite = false
                     )
                 }
                 emit(Resource.Success(tracks))

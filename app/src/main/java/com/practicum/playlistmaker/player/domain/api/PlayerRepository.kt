@@ -10,4 +10,5 @@ interface PlayerRepository {
     fun release()
     fun getCurrentPosition(): Long
     fun getMediaPlayer(): MediaPlayer
+    suspend fun getIdTracks(): List<Int>
 }

@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class PlayerInteractorImpl(
-    private val playerRepository: PlayerRepository,
+    private val playerRepository: PlayerRepository
 ) : PlayerInteractor {
 
     private val dateFormat by lazy { SimpleDateFormat("mm:ss", Locale.getDefault()) }
@@ -41,4 +41,8 @@ class PlayerInteractorImpl(
     }
 
     override fun getMediaPlayer(): MediaPlayer = playerRepository.getMediaPlayer()
+
+    override suspend fun getIdTracks(): List<Int> {
+        return playerRepository.getIdTracks()
+    }
 }

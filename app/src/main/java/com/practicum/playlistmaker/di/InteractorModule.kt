@@ -16,7 +16,7 @@ import org.koin.dsl.module
 
 val interactorModule = module {
     factory<SearchHistoryInteractor> {
-        SearchHistoryImpl(get(), get(), get())
+        SearchHistoryImpl(get(), get())
     }
 
     factory<TracksInteractor> {
@@ -35,7 +35,7 @@ val interactorModule = module {
         SharingInteractorImpl(get())
     }
 
-    single<FavouritesInteractor> {
+    factory<FavouritesInteractor> {
         FavouritesInteractorImpl(get())
     }
 }

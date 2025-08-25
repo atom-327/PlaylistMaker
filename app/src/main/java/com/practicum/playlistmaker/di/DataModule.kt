@@ -5,6 +5,7 @@ import android.media.MediaPlayer
 import androidx.room.Room
 import com.google.gson.Gson
 import com.practicum.playlistmaker.db.data.AppDatabase
+import com.practicum.playlistmaker.db.data.dao.TrackDao
 import com.practicum.playlistmaker.search.data.NetworkClient
 import com.practicum.playlistmaker.search.data.network.ITunesAPI
 import com.practicum.playlistmaker.search.data.network.RetrofitNetworkClient
@@ -35,6 +36,11 @@ val dataModule = module {
 
     single {
         Room.databaseBuilder(androidContext(), AppDatabase::class.java, "database.db")
+            .fallbackToDestructiveMigration()
             .build()
+    }
+
+    single<TrackDao> {
+        get<AppDatabase>().trackDao()
     }
 }
