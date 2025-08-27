@@ -9,7 +9,9 @@ class DataMapperImpl(private val gson: Gson) : DataMapper {
         return gson.toJson(tracks)
     }
 
-    override fun createTracksFromJson(json: String): Array<Track> {
-        return gson.fromJson(json, Array<Track>::class.java)
+    override fun createTracksFromJson(json: String?): Array<Track> {
+        return (if (json != null) {
+            return gson.fromJson(json, Array<Track>::class.java)
+        } else emptyList<Track>()).toTypedArray()
     }
 }

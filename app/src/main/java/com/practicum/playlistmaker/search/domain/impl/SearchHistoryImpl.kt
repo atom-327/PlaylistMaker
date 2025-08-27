@@ -7,7 +7,7 @@ import com.practicum.playlistmaker.core.domain.models.Track
 
 class SearchHistoryImpl(
     private val sharedPreferencesRepository: SharedPreferencesRepository,
-    private val dataMapper: DataMapper
+    private val dataMapper: DataMapper,
 ) : SearchHistoryInteractor {
 
     companion object {
@@ -23,18 +23,22 @@ class SearchHistoryImpl(
         }
     }
 
-    override fun addTrack(storyTracks: MutableList<Track>, track: Track) {
-        val existingTrack = storyTracks.find { it.trackId == track.trackId }
+    override fun addTrack(track: Track) {
+        val tracks = mutableListOf<Track>()
+        tracks.addAll(
+            dataMapper.createTracksFromJson(sharedPreferencesRepository.getStrItem(TRACK_ID))
+        )
+        val existingTrack = tracks.find { it.trackId == track.trackId }
         if (existingTrack != null) {
-            storyTracks.remove(existingTrack)
+            tracks.remove(existingTrack)
         }
-        storyTracks.add(0, track)
-        if (storyTracks.size > STORY_SIZE) {
-            storyTracks.removeAt(storyTracks.size - 1)
+        tracks.add(0, track)
+        if (tracks.size > STORY_SIZE) {
+            tracks.removeAt(tracks.size - 1)
         }
         sharedPreferencesRepository.removeItem(TRACK_ID)
         sharedPreferencesRepository.putStrItem(
-            TRACK_ID, dataMapper.createJsonFromTracks(storyTracks.toTypedArray())
+            TRACK_ID, dataMapper.createJsonFromTracks(tracks.toTypedArray())
         )
     }
 

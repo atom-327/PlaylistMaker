@@ -46,7 +46,11 @@ dependencies {
 
     dependencies {
         kapt(libs.moxy.compiler)
+        kapt(libs.room.compiler)
 
+        implementation(libs.room.runtime)
+        implementation(libs.room.ktx)
+        implementation(libs.kotlinx.coroutines.android)
         implementation(libs.kotlinx.coroutines.android)
         implementation(libs.navigation.fragment)
         implementation(libs.navigation.ui)

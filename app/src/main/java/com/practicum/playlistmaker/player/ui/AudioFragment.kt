@@ -18,6 +18,7 @@ import com.practicum.playlistmaker.player.presentation.view_model.AudioPlayerVie
 import org.koin.androidx.viewmodel.ext.android.getViewModel
 
 class AudioFragment : Fragment() {
+
     private var _binding: FragmentAudioBinding? = null
     private val binding get() = _binding!!
     private var darkTheme: Boolean = false
@@ -58,14 +59,14 @@ class AudioFragment : Fragment() {
             }
 
             toLikeTrackButton.setOnClickListener {
-                viewModel.changeLickedButtonStyle()
+                viewModel.onFavouriteClicked()
             }
         }
     }
 
     private fun setupObservers() {
         viewModel.getState().observe(viewLifecycleOwner) {
-            if (track != it.track && it.track != null) {
+            if (track != it!!.track && it.track != null) {
                 setupTrackInfo(it.track, this)
                 track = it.track
             }
