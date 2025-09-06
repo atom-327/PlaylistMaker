@@ -4,8 +4,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.practicum.playlistmaker.core.domain.models.Playlist
 import com.practicum.playlistmaker.core.domain.models.Track
 import com.practicum.playlistmaker.media.domain.api.FavouritesInteractor
+import com.practicum.playlistmaker.media.domain.api.PlaylistsInteractor
+import com.practicum.playlistmaker.media.presentation.PlaylistsState
 import com.practicum.playlistmaker.player.domain.api.PlayerInteractor
 import com.practicum.playlistmaker.player.presentation.PlayerState
 import com.practicum.playlistmaker.search.domain.api.SearchHistoryInteractor
@@ -16,7 +19,10 @@ import kotlinx.coroutines.launch
 class AudioPlayerViewModel(
     private val player: PlayerInteractor,
     private val searchHistory: SearchHistoryInteractor,
-    private val favouritesInteractor: FavouritesInteractor
+    private val favouritesInteractor: FavouritesInteractor,
+    private val playlistsInteractor: PlaylistsInteractor,
+    private val trackAddMessage: String,
+    private val trackAddedMessage: String
 ) : ViewModel() {
 
     companion object {
@@ -42,7 +48,9 @@ class AudioPlayerViewModel(
             state = STATE_DEFAULT,
             timer = player.resetTimer(),
             isPlayButtonEnabled = false,
-            isTrackLicked = false
+            isTrackLicked = false,
+            addedTrackState = false,
+            message = null
         )
     )
 
@@ -132,5 +140,49 @@ class AudioPlayerViewModel(
 
     private fun renderState(state: Int) {
         this.state.value = this.state.value?.copy(state = state)
+    }
+
+    private val stateLiveData = MutableLiveData<PlaylistsState>()
+    fun observeState(): LiveData<PlaylistsState> = stateLiveData
+
+    fun fillData() {
+        viewModelScope.launch {
+            playlistsInteractor.getPlaylists().collect { playlists ->
+                processResult(playlists)
+            }
+        }
+    }
+
+    fun onTrackAddToPlaylist(playlist: Playlist) {
+        viewModelScope.launch {
+            val result = playlistsInteractor.addTrackToPlaylist(track, playlist)
+
+            val message = if (result) {
+                "$trackAddMessage ${playlist.playlistName}"
+            } else {
+                "$trackAddedMessage ${playlist.playlistName}"
+            }
+
+            state.value = state.value?.copy(
+                addedTrackState = result,
+                message = message
+            )
+        }
+    }
+
+    fun resetMessage() {
+        state.value = state.value?.copy(message = null)
+    }
+
+    private fun processResult(playlists: List<Playlist>) {
+        if (playlists.isEmpty()) {
+            renderState(PlaylistsState.Empty)
+        } else {
+            renderState(PlaylistsState.Content(playlists))
+        }
+    }
+
+    private fun renderState(state: PlaylistsState) {
+        stateLiveData.postValue(state)
     }
 }

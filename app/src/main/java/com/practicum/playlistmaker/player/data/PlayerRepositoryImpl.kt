@@ -1,7 +1,7 @@
 package com.practicum.playlistmaker.player.data
 
 import android.media.MediaPlayer
-import com.practicum.playlistmaker.db.data.dao.TrackDao
+import com.practicum.playlistmaker.media.data.dao.TrackDao
 import com.practicum.playlistmaker.player.domain.api.PlayerRepository
 
 class PlayerRepositoryImpl(

@@ -27,6 +27,17 @@ class RootActivity : AppCompatActivity() {
             when (destination.id) {
                 R.id.audioFragment -> {
                     binding.bottomNavigationView.isVisible = false
+                    binding.navMenuLine.isVisible = false
+                }
+
+                R.id.playlistMakerFragment -> {
+                    binding.bottomNavigationView.isVisible = false
+                    binding.navMenuLine.isVisible = false
+                }
+
+                R.id.playlistInfoFragment -> {
+                    binding.bottomNavigationView.isVisible = false
+                    binding.navMenuLine.isVisible = false
                 }
 
                 else -> {

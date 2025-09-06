@@ -31,7 +31,7 @@ android {
             )
         }
     }
-    
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -48,6 +48,7 @@ dependencies {
         kapt(libs.moxy.compiler)
         kapt(libs.room.compiler)
 
+        implementation(libs.peko)
         implementation(libs.room.runtime)
         implementation(libs.room.ktx)
         implementation(libs.kotlinx.coroutines.android)

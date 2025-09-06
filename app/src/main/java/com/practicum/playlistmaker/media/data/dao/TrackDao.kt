@@ -1,11 +1,11 @@
-package com.practicum.playlistmaker.db.data.dao
+package com.practicum.playlistmaker.media.data.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.practicum.playlistmaker.db.data.entity.TrackEntity
+import com.practicum.playlistmaker.media.data.entity.TrackEntity
 
 @Dao
 interface TrackDao {

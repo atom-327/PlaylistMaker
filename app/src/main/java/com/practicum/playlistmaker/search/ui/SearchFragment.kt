@@ -58,9 +58,9 @@ class SearchFragment : Fragment() {
         onMovieClickDebounce = debounce<Track>(
             CLICK_DEBOUNCE_DELAY, viewLifecycleOwner.lifecycleScope, false
         ) { track ->
-            viewModel.addTrack(storyList, track)
+            viewModel.addTrack(track)
             findNavController().navigate(
-                R.id.action_searchFragment_to_audioFragment,
+                R.id.action_searchFragment_to_audioFragment
             )
         }
 

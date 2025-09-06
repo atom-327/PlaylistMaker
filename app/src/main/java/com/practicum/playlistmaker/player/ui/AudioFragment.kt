@@ -5,17 +5,28 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.practicum.playlistmaker.R
+import com.practicum.playlistmaker.core.domain.models.Playlist
 import com.practicum.playlistmaker.core.domain.models.Track
 import com.practicum.playlistmaker.core.ui.App
+import com.practicum.playlistmaker.core.ui.root.RootActivity
+import com.practicum.playlistmaker.core.util.debounce
 import com.practicum.playlistmaker.databinding.FragmentAudioBinding
+import com.practicum.playlistmaker.media.presentation.PlaylistsState
+import com.practicum.playlistmaker.media.ui.PlaylistAudioAdapter
 import com.practicum.playlistmaker.player.presentation.view_model.AudioPlayerViewModel
 import org.koin.androidx.viewmodel.ext.android.getViewModel
+import org.koin.core.parameter.parametersOf
 
 class AudioFragment : Fragment() {
 
@@ -26,6 +37,13 @@ class AudioFragment : Fragment() {
     private var state = -1
     private var isTrackLicked = false
     private lateinit var viewModel: AudioPlayerViewModel
+    private lateinit var playlistsAdapter: PlaylistAudioAdapter
+    private val playlists = mutableListOf<Playlist>()
+    private lateinit var onMovieClickDebounce: (Playlist) -> Unit
+    private var isTrackAdded: Boolean = true
+    private var toastText: String? = null
+    private lateinit var trackAddMessage: String
+    private lateinit var trackAddedMessage: String
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,9 +57,18 @@ class AudioFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel = getViewModel()
+        trackAddMessage = getString(R.string.trackAdd)
+        trackAddedMessage = getString(R.string.trackAdded)
+
+        viewModel = getViewModel { parametersOf(trackAddMessage, trackAddedMessage) }
 
         darkTheme = (requireContext().applicationContext as App).getAppTheme()
+
+        onMovieClickDebounce = debounce<Playlist>(
+            CLICK_DEBOUNCE_DELAY, viewLifecycleOwner.lifecycleScope, false
+        ) { playlist ->
+            viewModel.onTrackAddToPlaylist(playlist)
+        }
 
         setupViews()
         setupObservers()
@@ -49,6 +76,50 @@ class AudioFragment : Fragment() {
 
     private fun setupViews() {
         with(binding) {
+            val bottomSheetBehavior = BottomSheetBehavior.from(playlistsBottomSheet).apply {
+                state = BottomSheetBehavior.STATE_HIDDEN
+            }
+
+            bottomSheetBehavior.addBottomSheetCallback(object :
+                BottomSheetBehavior.BottomSheetCallback() {
+
+                override fun onStateChanged(bottomSheet: View, newState: Int) {
+
+                    when (newState) {
+                        BottomSheetBehavior.STATE_HIDDEN -> {
+                            overlay.isVisible = false
+                        }
+
+                        else -> {
+                            overlay.isVisible = true
+                        }
+                    }
+                }
+
+                override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                    val top = bottomSheet.top
+                    val screenHeight = resources.displayMetrics.heightPixels
+
+                    val alpha = 1f - (top.toFloat() / screenHeight.toFloat())
+
+                    overlay.alpha = alpha.coerceIn(0f, 1f)
+                    overlay.isVisible = alpha > 0f
+                }
+            })
+
+            playlistsAdapter = PlaylistAudioAdapter(playlists) { playlist ->
+                (activity as RootActivity).animateBottomNavigationView()
+                onMovieClickDebounce(playlist)
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                toastText?.let { text ->
+                    if (text.isNotEmpty()) {
+                        Toast.makeText(requireContext(), text, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            rvPlaylists.layoutManager =
+                LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+            rvPlaylists.adapter = playlistsAdapter
 
             searchButton.setNavigationOnClickListener {
                 findNavController().navigateUp()
@@ -60,6 +131,17 @@ class AudioFragment : Fragment() {
 
             toLikeTrackButton.setOnClickListener {
                 viewModel.onFavouriteClicked()
+            }
+
+            addToPlaylistButton.setOnClickListener {
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                viewModel.fillData()
+            }
+
+            createPlaylistButton.setOnClickListener {
+                findNavController().navigate(
+                    R.id.action_audioFragment_to_playlistMakerFragment
+                )
             }
         }
     }
@@ -79,6 +161,24 @@ class AudioFragment : Fragment() {
             if (isTrackLicked != it.isTrackLicked) {
                 changeLickedButtonStyle(it.isTrackLicked)
                 isTrackLicked = it.isTrackLicked
+            }
+            isTrackAdded = it.addedTrackState
+            it.message?.let { message ->
+                if (message.isNotEmpty()) {
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                }
+                viewModel.resetMessage()
+            }
+        }
+
+        viewModel.observeState().observe(viewLifecycleOwner) { state ->
+            if (state is PlaylistsState.Content) {
+                with(binding) {
+                    rvPlaylists.isVisible = true
+                }
+                this.playlists.clear()
+                this.playlists.addAll(state.playlists)
+                playlistsAdapter.notifyDataSetChanged()
             }
         }
     }
@@ -151,5 +251,9 @@ class AudioFragment : Fragment() {
         } else {
             binding.toLikeTrackButton.setImageResource(R.drawable.to_like_track_icon)
         }
+    }
+
+    companion object {
+        private const val CLICK_DEBOUNCE_DELAY = 1_000L
     }
 }

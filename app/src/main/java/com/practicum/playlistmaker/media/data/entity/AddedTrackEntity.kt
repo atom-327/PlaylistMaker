@@ -1,10 +1,10 @@
-package com.practicum.playlistmaker.db.data.entity
+package com.practicum.playlistmaker.media.data.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "track_table")
-data class TrackEntity(
+@Entity(tableName = "added_track_table")
+data class AddedTrackEntity(
     @PrimaryKey val trackId: Int,
     val trackName: String,
     val artistName: String,
