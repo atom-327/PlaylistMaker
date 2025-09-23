@@ -26,18 +26,31 @@ class PlaylistAudioViewHolder(private val binding: PlaylistAudioViewItemBinding)
                     )
                 ).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(playlistIcon)
             playlistName.text = item.playlistName
-            playlistInfo.text = getTrackWordForm(item.numberOfTracks)
+            playlistInfo.text = itemView.context.resources.getQuantityString(
+                R.plurals.tracks_count,
+                item.numberOfTracks,
+                item.numberOfTracks
+            )
+//            playlistInfo.text = getTrackWordForm(item.numberOfTracks)
             playlistButton.setOnClickListener {
                 onPlaylistClick(item)
             }
         }
     }
 
-    private fun getTrackWordForm(count: Int): String {
-        return when {
-            count % 10 == 1 && count % 100 != 11 -> "$count трек"
-            count % 10 in 2..4 && count % 100 !in 12..14 -> "$count трека"
-            else -> "$count треков"
-        }
-    }
+//    private fun getTrackWordForm(count: Int): String {
+//        return itemView.context.resources.getQuantityString(
+//            R.plurals.tracks_count,
+//            count,
+//            count
+//        )
+//    }
+
+//    private fun getTrackWordForm(count: Int): String {
+//        return when {
+//            count % 10 == 1 && count % 100 != 11 -> "$count трек"
+//            count % 10 in 2..4 && count % 100 !in 12..14 -> "$count трека"
+//            else -> "$count треков"
+//        }
+//    }
 }

@@ -26,18 +26,14 @@ class PlaylistsViewHolder(private val binding: PlaylistItemBinding) :
                     )
                 ).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(playlistIcon)
             playlistTitle.text = item.playlistName
-            playlistTracks.text = getTrackWordForm(item.numberOfTracks)
+            playlistTracks.text = itemView.context.resources.getQuantityString(
+                R.plurals.tracks_count,
+                item.numberOfTracks,
+                item.numberOfTracks
+            )
             playlistButton.setOnClickListener {
                 onPlaylistClick(item)
             }
-        }
-    }
-
-    private fun getTrackWordForm(count: Int): String {
-        return when {
-            count % 10 == 1 && count % 100 != 11 -> "$count трек"
-            count % 10 in 2..4 && count % 100 !in 12..14 -> "$count трека"
-            else -> "$count треков"
         }
     }
 }

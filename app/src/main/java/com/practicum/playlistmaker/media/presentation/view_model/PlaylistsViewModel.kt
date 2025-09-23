@@ -1,5 +1,6 @@
 package com.practicum.playlistmaker.media.presentation.view_model
 
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -23,9 +24,9 @@ class PlaylistsViewModel(private val playlistsInteractor: PlaylistsInteractor) :
         }
     }
 
-    fun onPlaylistCreate(playlist: Playlist) {
+    fun onPlaylistCreate(playlist: Playlist, imageUri: Uri?) {
         viewModelScope.launch {
-            playlistsInteractor.addPlaylist(playlist)
+            playlistsInteractor.addPlaylist(playlist, imageUri)
         }
     }
 

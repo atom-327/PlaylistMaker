@@ -210,6 +210,9 @@ class AudioFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        track = null
+        state = -1
+        isTrackLicked = false
         _binding = null
     }
 

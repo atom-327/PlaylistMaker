@@ -1,11 +1,12 @@
 package com.practicum.playlistmaker.media.domain.api
 
+import android.net.Uri
 import com.practicum.playlistmaker.core.domain.models.Playlist
 import com.practicum.playlistmaker.core.domain.models.Track
 import kotlinx.coroutines.flow.Flow
 
 interface PlaylistsInteractor {
-    suspend fun addPlaylist(playlist: Playlist)
+    suspend fun addPlaylist(playlist: Playlist, imageUri: Uri?)
     suspend fun deletePlaylist(playlist: Playlist)
     fun getPlaylists(): Flow<List<Playlist>>
     suspend fun addTrackToPlaylist(track: Track, playlist: Playlist): Boolean

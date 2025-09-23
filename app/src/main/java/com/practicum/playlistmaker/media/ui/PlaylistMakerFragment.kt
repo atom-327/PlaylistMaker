@@ -2,23 +2,21 @@ package com.practicum.playlistmaker.media.ui
 
 import android.Manifest
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.provider.Settings
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -34,11 +32,6 @@ import com.practicum.playlistmaker.databinding.FragmentPlaylistMakerBinding
 import com.practicum.playlistmaker.media.presentation.view_model.PlaylistsViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.getViewModel
-import java.io.File
-import java.io.FileOutputStream
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class PlaylistMakerFragment : Fragment() {
 
@@ -78,7 +71,7 @@ class PlaylistMakerFragment : Fragment() {
                     ).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true)
                         .into(binding.addPhotoButton)
                     isPhotoChanged = true
-                    playlist.pathToPlaylistIcon = saveImageToPrivateStorage(uri)
+                    playlist.pathToPlaylistIcon = uri.toString()
                 }
             }
 
@@ -94,108 +87,64 @@ class PlaylistMakerFragment : Fragment() {
                 } else findNavController().navigateUp()
             }
 
-            nameOfPlaylist.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(
-                    s: CharSequence?, start: Int, count: Int, after: Int
-                ) {
+            nameOfPlaylist.doOnTextChanged { text, _, _, _ ->
+                val trimmedText = text?.toString()?.trim()
+                val isTextValid = !trimmedText.isNullOrEmpty() && trimmedText.isNotBlank()
+                val hasFocus = nameOfPlaylist.hasFocus()
+
+                updateEditTextState(
+                    editText = nameOfPlaylist,
+                    title = titleNameOfPlaylist,
+                    hasFocus = hasFocus,
+                    isTextValid = isTextValid
+                )
+
+                createPlaylistButton.isEnabled = isTextValid
+                binding.createPlaylistButton.isClickable = isTextValid
+
+                if (isTextValid) {
+                    createPlaylistButton.setBackgroundResource(R.drawable.button_pressed)
+                } else {
+                    createPlaylistButton.setBackgroundResource(R.drawable.button_enabled)
                 }
-
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    val text = s?.toString()?.trim()
-                    val isTextValid = !text.isNullOrEmpty() && text.isNotBlank()
-                    val hasFocus = nameOfPlaylist.hasFocus()
-                    if (hasFocus) {
-                        titleNameOfPlaylist.isVisible = true
-                        nameOfPlaylist.background =
-                            ContextCompat.getDrawable(requireContext(), R.drawable.edit_pressed)
-                    } else if (isTextValid) {
-                        titleNameOfPlaylist.isVisible = true
-                        nameOfPlaylist.background =
-                            ContextCompat.getDrawable(requireContext(), R.drawable.edit_pressed)
-                    } else {
-                        titleNameOfPlaylist.isVisible = false
-                        nameOfPlaylist.background =
-                            ContextCompat.getDrawable(requireContext(), R.drawable.edit_enabled)
-                    }
-
-                    createPlaylistButton.isEnabled = isTextValid
-                    binding.createPlaylistButton.isClickable = isTextValid
-
-                    if (isTextValid) {
-                        createPlaylistButton.setBackgroundResource(R.drawable.button_pressed)
-                    } else {
-                        createPlaylistButton.setBackgroundResource(R.drawable.button_enabled)
-                    }
-                }
-
-                override fun afterTextChanged(s: Editable?) {}
-            })
+            }
 
             nameOfPlaylist.setOnFocusChangeListener { _, hasFocus ->
                 val text = nameOfPlaylist.text?.toString()?.trim()
                 val isTextValid = !text.isNullOrEmpty() && text.isNotBlank()
-                if (hasFocus) {
-                    titleNameOfPlaylist.isVisible = true
-                    nameOfPlaylist.background =
-                        ContextCompat.getDrawable(requireContext(), R.drawable.edit_pressed)
-                } else if (isTextValid) {
-                    titleNameOfPlaylist.isVisible = true
-                    nameOfPlaylist.background =
-                        ContextCompat.getDrawable(requireContext(), R.drawable.edit_pressed)
-                } else {
-                    titleNameOfPlaylist.isVisible = false
-                    nameOfPlaylist.background =
-                        ContextCompat.getDrawable(requireContext(), R.drawable.edit_enabled)
-                }
+                updateEditTextState(
+                    editText = nameOfPlaylist,
+                    title = titleNameOfPlaylist,
+                    hasFocus = hasFocus,
+                    isTextValid = isTextValid
+                )
                 if (!hasFocus) {
                     nameOfPlaylist.setText(text)
                 }
             }
 
-            descriptionOfPlaylist.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(
-                    s: CharSequence?, start: Int, count: Int, after: Int
-                ) {
-                }
+            descriptionOfPlaylist.doOnTextChanged { text, _, _, _ ->
+                val trimmedText = text?.toString()?.trim()
+                val isTextValid = !trimmedText.isNullOrEmpty() && trimmedText.isNotBlank()
+                val hasFocus = descriptionOfPlaylist.hasFocus()
 
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    val text = s?.toString()?.trim()
-                    val isTextValid = !text.isNullOrEmpty() && text.isNotBlank()
-                    val hasFocus = descriptionOfPlaylist.hasFocus()
-                    if (hasFocus) {
-                        titleDescriptionOfPlaylist.isVisible = true
-                        descriptionOfPlaylist.background =
-                            ContextCompat.getDrawable(requireContext(), R.drawable.edit_pressed)
-                    } else if (isTextValid) {
-                        titleDescriptionOfPlaylist.isVisible = true
-                        descriptionOfPlaylist.background =
-                            ContextCompat.getDrawable(requireContext(), R.drawable.edit_pressed)
-                    } else {
-                        titleDescriptionOfPlaylist.isVisible = false
-                        descriptionOfPlaylist.background =
-                            ContextCompat.getDrawable(requireContext(), R.drawable.edit_enabled)
-                    }
-                }
-
-                override fun afterTextChanged(s: Editable?) {}
-            })
+                updateEditTextState(
+                    editText = descriptionOfPlaylist,
+                    title = titleDescriptionOfPlaylist,
+                    hasFocus = hasFocus,
+                    isTextValid = isTextValid
+                )
+            }
 
             descriptionOfPlaylist.setOnFocusChangeListener { _, hasFocus ->
                 val text = descriptionOfPlaylist.text?.toString()?.trim()
                 val isTextValid = !text.isNullOrEmpty() && text.isNotBlank()
-                if (hasFocus) {
-                    titleDescriptionOfPlaylist.isVisible = true
-                    descriptionOfPlaylist.background =
-                        ContextCompat.getDrawable(requireContext(), R.drawable.edit_pressed)
-                } else if (isTextValid) {
-                    titleDescriptionOfPlaylist.isVisible = true
-                    descriptionOfPlaylist.background =
-                        ContextCompat.getDrawable(requireContext(), R.drawable.edit_pressed)
-                } else {
-                    titleDescriptionOfPlaylist.isVisible = false
-                    descriptionOfPlaylist.background =
-                        ContextCompat.getDrawable(requireContext(), R.drawable.edit_enabled)
-                }
+                updateEditTextState(
+                    editText = descriptionOfPlaylist,
+                    title = titleDescriptionOfPlaylist,
+                    hasFocus = hasFocus,
+                    isTextValid = isTextValid
+                )
                 if (!hasFocus) {
                     descriptionOfPlaylist.setText(text)
                 }
@@ -235,7 +184,8 @@ class PlaylistMakerFragment : Fragment() {
             createPlaylistButton.setOnClickListener {
                 playlist.playlistName = nameOfPlaylist.text.toString().trim()
                 playlist.playlistDescription = descriptionOfPlaylist.text.toString()
-                viewModel.onPlaylistCreate(playlist)
+                viewModel.onPlaylistCreate(
+                    playlist, playlist.pathToPlaylistIcon?.let { Uri.parse(it) })
                 val playlistName = "Плейлист ${playlist.playlistName} создан"
                 findNavController().navigateUp()
                 Toast.makeText(requireContext(), playlistName, Toast.LENGTH_SHORT).show()
@@ -243,19 +193,21 @@ class PlaylistMakerFragment : Fragment() {
         }
     }
 
-    private fun saveImageToPrivateStorage(uri: Uri): String {
-        val filePath =
-            File(requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES), "myalbum")
-        if (!filePath.exists()) {
-            filePath.mkdirs()
+    private fun updateEditTextState(
+        editText: EditText, title: TextView, hasFocus: Boolean, isTextValid: Boolean
+    ) {
+        if (hasFocus) {
+            title.isVisible = true
+            editText.background =
+                ContextCompat.getDrawable(requireContext(), R.drawable.edit_pressed)
+        } else if (isTextValid) {
+            title.isVisible = true
+            editText.background =
+                ContextCompat.getDrawable(requireContext(), R.drawable.edit_pressed)
+        } else {
+            title.isVisible = false
+            editText.background =
+                ContextCompat.getDrawable(requireContext(), R.drawable.edit_enabled)
         }
-        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val fileName = "playlist_cover_$timestamp.jpg"
-        val file = File(filePath, fileName)
-        val inputStream = requireContext().contentResolver.openInputStream(uri)
-        val outputStream = FileOutputStream(file)
-        BitmapFactory.decodeStream(inputStream)
-            .compress(Bitmap.CompressFormat.JPEG, 30, outputStream)
-        return file.absoluteFile.toString()
     }
 }
