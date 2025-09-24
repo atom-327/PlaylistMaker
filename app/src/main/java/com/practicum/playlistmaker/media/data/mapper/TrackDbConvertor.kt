@@ -1,7 +1,7 @@
-package com.practicum.playlistmaker.db.data.mapper
+package com.practicum.playlistmaker.media.data.mapper
 
 import com.practicum.playlistmaker.core.domain.models.Track
-import com.practicum.playlistmaker.db.data.entity.TrackEntity
+import com.practicum.playlistmaker.media.data.entity.TrackEntity
 
 class TrackDbConvertor {
 

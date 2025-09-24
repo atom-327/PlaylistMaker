@@ -1,9 +1,9 @@
 package com.practicum.playlistmaker.media.data
 
 import com.practicum.playlistmaker.core.domain.models.Track
-import com.practicum.playlistmaker.db.data.dao.TrackDao
-import com.practicum.playlistmaker.db.data.entity.TrackEntity
-import com.practicum.playlistmaker.db.data.mapper.TrackDbConvertor
+import com.practicum.playlistmaker.media.data.dao.TrackDao
+import com.practicum.playlistmaker.media.data.entity.TrackEntity
+import com.practicum.playlistmaker.media.data.mapper.TrackDbConvertor
 import com.practicum.playlistmaker.media.domain.api.FavouritesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -24,8 +24,8 @@ class FavouritesRepositoryImpl(
     }
 
     override fun getTracks(): Flow<List<Track>> = flow {
-        val sortedTracks =
-            convertFromTrackEntity(trackDao.getTracks().sortedByDescending { it.addedDate })
+        val sortedTracks = convertFromTrackEntity(
+            trackDao.getTracks().sortedByDescending { it.addedDate })
         emit(sortedTracks)
     }
 

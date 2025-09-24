@@ -7,5 +7,7 @@ data class PlayerState(
     val state: Int,
     val timer: String?,
     val isPlayButtonEnabled: Boolean,
-    val isTrackLicked: Boolean
+    val isTrackLicked: Boolean,
+    val addedTrackState: Boolean,
+    val message: String?
 )

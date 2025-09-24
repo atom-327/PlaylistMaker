@@ -32,6 +32,7 @@
         app:menu="@menu/bottom_navigation_menu" />
 
     <View
+        android:id="@+id/navMenuLine"
         android:layout_width="match_parent"
         android:layout_height="0.5dp"
         android:background="@color/grey"

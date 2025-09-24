@@ -13,8 +13,8 @@ val viewModelModule = module {
         SearchViewModel(get(), get(), get(), errorStr, emptyStr)
     }
 
-    viewModel {
-        AudioPlayerViewModel(get(), get(), get())
+    viewModel { (trackAddMessage: String, trackAddedMessage: String) ->
+        AudioPlayerViewModel(get(), get(), get(), get(), trackAddMessage, trackAddedMessage)
     }
 
     viewModel {
@@ -22,7 +22,7 @@ val viewModelModule = module {
     }
 
     viewModel {
-        PlaylistsViewModel()
+        PlaylistsViewModel(get())
     }
 
     viewModel {

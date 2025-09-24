@@ -99,7 +99,7 @@ class SearchViewModel(
         searchHistory.clearHistory(tracks)
     }
 
-    fun addTrack(tracks: MutableList<Track>, track: Track) {
+    fun addTrack(track: Track) {
         searchHistory.addTrack(track)
     }
 

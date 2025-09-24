@@ -20,8 +20,10 @@ espresso-core = "3.6.1"
 agp = "8.11.1"
 kotlin = "2.2.10"
 room_version = "2.7.2"
+peko = "3.0.5"
 
 [libraries]
+peko = { group = "com.markodevcic", name = "peko", version.ref = "peko" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room_version" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room_version" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
