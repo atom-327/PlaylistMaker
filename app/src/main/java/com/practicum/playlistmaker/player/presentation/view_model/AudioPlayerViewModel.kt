@@ -35,9 +35,26 @@ class AudioPlayerViewModel(
 
     private var timerJob: Job? = null
     private lateinit var track: Track
+    private var isPlayerInitialized = false
 
     init {
         viewModelScope.launch {
+            initializePlayer()
+        }
+    }
+
+    fun initialize() {
+        if (!isPlayerInitialized) {
+            viewModelScope.launch {
+                initializePlayer()
+            }
+        }
+    }
+
+    private suspend fun initializePlayer() {
+        val listeningTrack = searchHistory.getListeningTrack()
+        if (listeningTrack != null) {
+            track = listeningTrack
             preparePlayer()
         }
     }
@@ -91,15 +108,23 @@ class AudioPlayerViewModel(
         when (state.value?.state) {
             STATE_PLAYING -> pausePlayer()
             STATE_PREPARED, STATE_PAUSED -> startPlayer()
+            STATE_DEFAULT -> {
+                viewModelScope.launch {
+                    startPlayer()
+                }
+            }
         }
     }
 
     private suspend fun preparePlayer() {
-        track = searchHistory.getListeningTrack()!!
+        player.reset()
         player.prepare(track.previewUrl)
-        checkIfTrackIsFavorite()
         player.getMediaPlayer().setOnPreparedListener {
-            state.value = state.value?.copy(isPlayButtonEnabled = true)
+            isPlayerInitialized = true
+            state.value = state.value?.copy(
+                track = track,
+                isPlayButtonEnabled = true
+            )
             renderState(STATE_PREPARED)
         }
         player.getMediaPlayer().setOnCompletionListener {
@@ -107,6 +132,7 @@ class AudioPlayerViewModel(
             renderState(STATE_PREPARED)
             state.value = state.value?.copy(timer = player.resetTimer())
         }
+        checkIfTrackIsFavorite()
     }
 
     private fun startPlayer() {
@@ -124,6 +150,7 @@ class AudioPlayerViewModel(
     private fun releasePlayer() {
         player.stop()
         player.release()
+        isPlayerInitialized = false
         state.value = state.value?.copy(timer = player.resetTimer())
         renderState(STATE_DEFAULT)
     }

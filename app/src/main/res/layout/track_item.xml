@@ -27,7 +27,7 @@
         <TextView
             android:id="@+id/trackInfo"
             style="@style/TrackInfoTextStyle"
-            tools:text="@string/trackInfo" />
+            tools:text="@string/doubleInfo" />
     </LinearLayout>
 
     <Button

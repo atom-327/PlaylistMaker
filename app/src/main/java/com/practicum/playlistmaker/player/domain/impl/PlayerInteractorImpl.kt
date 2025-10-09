@@ -32,6 +32,10 @@ class PlayerInteractorImpl(
         playerRepository.release()
     }
 
+    override fun reset() {
+        playerRepository.reset()
+    }
+
     override fun getCurrentPosition(): String? {
         return dateFormat.format(playerRepository.getCurrentPosition())
     }

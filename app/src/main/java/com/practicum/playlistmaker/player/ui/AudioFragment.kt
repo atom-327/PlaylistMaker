@@ -39,7 +39,7 @@ class AudioFragment : Fragment() {
     private lateinit var viewModel: AudioPlayerViewModel
     private lateinit var playlistsAdapter: PlaylistAudioAdapter
     private val playlists = mutableListOf<Playlist>()
-    private lateinit var onMovieClickDebounce: (Playlist) -> Unit
+    private lateinit var onPlaylistClickDebounce: (Playlist) -> Unit
     private var isTrackAdded: Boolean = true
     private var toastText: String? = null
     private lateinit var trackAddMessage: String
@@ -64,7 +64,7 @@ class AudioFragment : Fragment() {
 
         darkTheme = (requireContext().applicationContext as App).getAppTheme()
 
-        onMovieClickDebounce = debounce<Playlist>(
+        onPlaylistClickDebounce = debounce<Playlist>(
             CLICK_DEBOUNCE_DELAY, viewLifecycleOwner.lifecycleScope, false
         ) { playlist ->
             viewModel.onTrackAddToPlaylist(playlist)
@@ -109,7 +109,7 @@ class AudioFragment : Fragment() {
 
             playlistsAdapter = PlaylistAudioAdapter(playlists) { playlist ->
                 (activity as RootActivity).animateBottomNavigationView()
-                onMovieClickDebounce(playlist)
+                onPlaylistClickDebounce(playlist)
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
                 toastText?.let { text ->
                     if (text.isNotEmpty()) {
@@ -201,6 +201,11 @@ class AudioFragment : Fragment() {
             trackGenreInfo.text = track.primaryGenreName
             trackCountryInfo.text = track.country
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.initialize()
     }
 
     override fun onPause() {

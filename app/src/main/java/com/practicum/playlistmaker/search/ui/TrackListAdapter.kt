@@ -8,7 +8,8 @@ import com.practicum.playlistmaker.core.domain.models.Track
 
 class TrackListAdapter(
     private val tracks: MutableList<Track>,
-    private val onTrackClick: (Track) -> Unit
+    private val onTrackClick: (Track) -> Unit,
+    private val onTrackLongClick: (Track) -> Unit
 ) : RecyclerView.Adapter<TrackListViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackListViewHolder {
@@ -18,7 +19,7 @@ class TrackListAdapter(
 
     override fun onBindViewHolder(holder: TrackListViewHolder, position: Int) {
         val item = tracks[position]
-        holder.bind(item, onTrackClick)
+        holder.bind(item, onTrackClick, onTrackLongClick)
     }
 
     override fun getItemCount(): Int {

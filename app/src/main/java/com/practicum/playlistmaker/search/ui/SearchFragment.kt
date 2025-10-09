@@ -31,7 +31,7 @@ class SearchFragment : Fragment() {
     private lateinit var errorMessage: String
     private lateinit var emptyMessage: String
     private lateinit var viewModel: SearchViewModel
-    private lateinit var onMovieClickDebounce: (Track) -> Unit
+    private lateinit var onTrackClickDebounce: (Track) -> Unit
     private lateinit var listener: SharedPreferences.OnSharedPreferenceChangeListener
     private lateinit var tracksAdapter: TrackListAdapter
     private lateinit var storyTracksAdapter: TrackListAdapter
@@ -55,7 +55,7 @@ class SearchFragment : Fragment() {
             parametersOf(errorMessage, emptyMessage)
         }
 
-        onMovieClickDebounce = debounce<Track>(
+        onTrackClickDebounce = debounce<Track>(
             CLICK_DEBOUNCE_DELAY, viewLifecycleOwner.lifecycleScope, false
         ) { track ->
             viewModel.addTrack(track)
@@ -139,18 +139,20 @@ class SearchFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        tracksAdapter = TrackListAdapter(tracks) { track ->
+        tracksAdapter = TrackListAdapter(tracks, onTrackClick = { track ->
             (activity as RootActivity).animateBottomNavigationView()
-            onMovieClickDebounce(track)
-        }
+            onTrackClickDebounce(track)
+        }, onTrackLongClick = { track ->
+        })
         binding.rvTrackList.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         binding.rvTrackList.adapter = tracksAdapter
 
-        storyTracksAdapter = TrackListAdapter(storyList) { track ->
+        storyTracksAdapter = TrackListAdapter(storyList, onTrackClick = { track ->
             (activity as RootActivity).animateBottomNavigationView()
-            onMovieClickDebounce(track)
-        }
+            onTrackClickDebounce(track)
+        }, onTrackLongClick = { track ->
+        })
         binding.storyTrackList.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         binding.storyTrackList.adapter = storyTracksAdapter
