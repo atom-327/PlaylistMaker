@@ -1,6 +1,7 @@
 package com.practicum.playlistmaker.media.ui
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -12,7 +13,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -40,6 +41,7 @@ class PlaylistMakerFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var viewModel: PlaylistsViewModel
     val requester = PermissionRequester.instance()
+    private lateinit var galleryIntentLauncher: ActivityResultLauncher<Intent>
     private var isPhotoChanged = false
     private var playlist: Playlist = Playlist(0, null, null, null, null, 0)
     private var currentPlaylistId = -1
@@ -69,19 +71,22 @@ class PlaylistMakerFragment : Fragment() {
     }
 
     private fun setupViews() {
-        val pickMedia =
-            registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-                if (uri != null) {
-                    Glide.with(requireContext()).load(uri).centerCrop().transform(
-                        RoundedCorners(
-                            TypedValue.applyDimension(
-                                TypedValue.COMPLEX_UNIT_DIP, 8F, resources.displayMetrics
-                            ).toInt()
-                        )
-                    ).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true)
-                        .into(binding.addPhotoButton)
-                    isPhotoChanged = true
-                    playlist.pathToPlaylistIcon = uri.toString()
+        galleryIntentLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val uri = result.data?.data
+                    if (uri != null) {
+                        Glide.with(requireContext()).load(uri).centerCrop().transform(
+                            RoundedCorners(
+                                TypedValue.applyDimension(
+                                    TypedValue.COMPLEX_UNIT_DIP, 8F, resources.displayMetrics
+                                ).toInt()
+                            )
+                        ).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true)
+                            .into(binding.addPhotoButton)
+                        isPhotoChanged = true
+                        playlist.pathToPlaylistIcon = uri.toString()
+                    }
                 }
             }
 
@@ -154,7 +159,7 @@ class PlaylistMakerFragment : Fragment() {
                     requester.request(Manifest.permission.READ_MEDIA_IMAGES).collect { result ->
                         when (result) {
                             is PermissionResult.Granted -> {
-                                pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                                launchGalleryIntent()
                             }
 
                             is PermissionResult.Denied.DeniedPermanently -> {
@@ -277,6 +282,14 @@ class PlaylistMakerFragment : Fragment() {
                 binding.createPlaylistButton.setBackgroundResource(R.drawable.button_pressed)
             }
         }
+    }
+
+    private fun launchGalleryIntent() {
+        val intent = Intent(Intent.ACTION_PICK).apply {
+            type = "image/*"
+            putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/jpeg", "image/png", "image/jpg"))
+        }
+        galleryIntentLauncher.launch(intent)
     }
 
     private fun updateEditTextState(

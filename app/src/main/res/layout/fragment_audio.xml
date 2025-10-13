@@ -240,7 +240,7 @@
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
         <View
-            style="@style/BottomSheetView"
+            style="@style/bottomSheetView"
             android:layout_width="50dp"
             android:layout_height="4dp"
             android:layout_gravity="center"

@@ -44,6 +44,7 @@ class AudioFragment : Fragment() {
     private var toastText: String? = null
     private lateinit var trackAddMessage: String
     private lateinit var trackAddedMessage: String
+    private var shouldHideBottomSheet = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -110,7 +111,6 @@ class AudioFragment : Fragment() {
             playlistsAdapter = PlaylistAudioAdapter(playlists) { playlist ->
                 (activity as RootActivity).animateBottomNavigationView()
                 onPlaylistClickDebounce(playlist)
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
                 toastText?.let { text ->
                     if (text.isNotEmpty()) {
                         Toast.makeText(requireContext(), text, Toast.LENGTH_SHORT).show()
@@ -168,6 +168,11 @@ class AudioFragment : Fragment() {
                     Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
                 }
                 viewModel.resetMessage()
+            }
+            if (it.shouldHideBottomSheet) {
+                val bottomSheetBehavior = BottomSheetBehavior.from(binding.playlistsBottomSheet)
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                viewModel.resetBottomSheetFlag()
             }
         }
 

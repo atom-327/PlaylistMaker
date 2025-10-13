@@ -183,7 +183,7 @@
         <item name="android:textSize">12sp</item>
     </style>
 
-    <style name="BottomSheetView">
+    <style name="bottomSheetView">
         <item name="android:backgroundTint">@color/white</item>
     </style>
 

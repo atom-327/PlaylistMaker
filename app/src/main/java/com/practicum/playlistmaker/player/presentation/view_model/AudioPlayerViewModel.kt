@@ -67,7 +67,8 @@ class AudioPlayerViewModel(
             isPlayButtonEnabled = false,
             isTrackLicked = false,
             addedTrackState = false,
-            message = null
+            message = null,
+            shouldHideBottomSheet = false
         )
     )
 
@@ -183,22 +184,30 @@ class AudioPlayerViewModel(
     fun onTrackAddToPlaylist(playlist: Playlist) {
         viewModelScope.launch {
             val result = playlistsInteractor.addTrackToPlaylist(track, playlist)
-
-            val message = if (result) {
-                "$trackAddMessage ${playlist.playlistName}"
+            var message: String?
+            val shouldHideBottomSheet: Boolean
+            if (result) {
+                message = "$trackAddMessage ${playlist.playlistName}"
+                shouldHideBottomSheet = true
             } else {
-                "$trackAddedMessage ${playlist.playlistName}"
+                message = "$trackAddedMessage ${playlist.playlistName}"
+                shouldHideBottomSheet = false
             }
 
             state.value = state.value?.copy(
                 addedTrackState = result,
-                message = message
+                message = message,
+                shouldHideBottomSheet = shouldHideBottomSheet
             )
         }
     }
 
     fun resetMessage() {
         state.value = state.value?.copy(message = null)
+    }
+
+    fun resetBottomSheetFlag() {
+        state.value = state.value?.copy(shouldHideBottomSheet = false)
     }
 
     private fun processResult(playlists: List<Playlist>) {

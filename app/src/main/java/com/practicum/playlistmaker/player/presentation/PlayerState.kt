@@ -9,5 +9,6 @@ data class PlayerState(
     val isPlayButtonEnabled: Boolean,
     val isTrackLicked: Boolean,
     val addedTrackState: Boolean,
-    val message: String?
+    val message: String?,
+    val shouldHideBottomSheet: Boolean
 )

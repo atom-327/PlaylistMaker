@@ -30,6 +30,7 @@ import com.practicum.playlistmaker.search.ui.TrackListAdapter
 import org.koin.androidx.viewmodel.ext.android.getViewModel
 
 class PlaylistInfoFragment : Fragment() {
+
     private lateinit var viewModel: PlaylistsViewModel
     private var _binding: FragmentPlaylistInfoBinding? = null
     private val binding get() = _binding!!
@@ -244,6 +245,9 @@ class PlaylistInfoFragment : Fragment() {
     private fun loadTracks(tracks: List<Track>) {
         this.tracks.clear()
         this.tracks.addAll(tracks)
+        if (tracks.isNotEmpty()) {
+            binding.placeholderText.isVisible = false
+        }
         tracksAdapter.notifyDataSetChanged()
     }
 
