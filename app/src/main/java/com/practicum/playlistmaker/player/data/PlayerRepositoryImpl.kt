@@ -5,16 +5,19 @@ import com.practicum.playlistmaker.media.data.dao.TrackDao
 import com.practicum.playlistmaker.player.domain.api.PlayerRepository
 
 class PlayerRepositoryImpl(
-    private val mediaPlayer: MediaPlayer,
-    private val trackDao: TrackDao
+    private val mediaPlayer: MediaPlayer, private val trackDao: TrackDao
 ) : PlayerRepository {
 
     override fun start() {
-        mediaPlayer.start()
+        if (!mediaPlayer.isPlaying) {
+            mediaPlayer.start()
+        }
     }
 
     override fun pause() {
-        mediaPlayer.pause()
+        if (mediaPlayer.isPlaying) {
+            mediaPlayer.pause()
+        }
     }
 
     override fun stop() {
@@ -28,6 +31,10 @@ class PlayerRepositoryImpl(
 
     override fun release() {
         mediaPlayer.release()
+    }
+
+    override fun reset() {
+        mediaPlayer.reset()
     }
 
     override fun getCurrentPosition(): Long = mediaPlayer.currentPosition.toLong()

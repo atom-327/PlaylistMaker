@@ -2,7 +2,7 @@ package com.practicum.playlistmaker.media.presentation
 
 import com.practicum.playlistmaker.core.domain.models.Playlist
 
-sealed interface PlaylistsState {
+interface PlaylistsState {
 
     data object Loading : PlaylistsState
 
@@ -11,4 +11,8 @@ sealed interface PlaylistsState {
     ) : PlaylistsState
 
     object Empty : PlaylistsState
+
+    data class PlaylistContent(
+        val playlist: Playlist?
+    ) : PlaylistsState
 }

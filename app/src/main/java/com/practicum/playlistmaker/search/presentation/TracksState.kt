@@ -2,7 +2,7 @@ package com.practicum.playlistmaker.search.presentation
 
 import com.practicum.playlistmaker.core.domain.models.Track
 
-sealed interface TracksState {
+interface TracksState {
 
     data object Loading : TracksState
 

@@ -1,6 +1,7 @@
 package com.practicum.playlistmaker.media.ui
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -12,7 +13,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -29,6 +30,7 @@ import com.markodevcic.peko.PermissionResult
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.core.domain.models.Playlist
 import com.practicum.playlistmaker.databinding.FragmentPlaylistMakerBinding
+import com.practicum.playlistmaker.media.presentation.PlaylistsState
 import com.practicum.playlistmaker.media.presentation.view_model.PlaylistsViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.getViewModel
@@ -39,8 +41,14 @@ class PlaylistMakerFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var viewModel: PlaylistsViewModel
     val requester = PermissionRequester.instance()
+    private lateinit var galleryIntentLauncher: ActivityResultLauncher<Intent>
     private var isPhotoChanged = false
-    private val playlist: Playlist = Playlist(0, null, null, null, null, 0)
+    private var playlist: Playlist = Playlist(0, null, null, null, null, 0)
+    private var currentPlaylistId = -1
+
+    private val playlistId: Int by lazy {
+        arguments?.getInt("playlistId", -1) ?: -1
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -56,52 +64,49 @@ class PlaylistMakerFragment : Fragment() {
         viewModel = getViewModel()
 
         setupViews()
+        setupObservers()
+
+        currentPlaylistId = playlistId
+        viewModel.loadPlaylistById(currentPlaylistId)
     }
 
     private fun setupViews() {
-        val pickMedia =
-            registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-                if (uri != null) {
-                    Glide.with(requireContext()).load(uri).centerCrop().transform(
-                        RoundedCorners(
-                            TypedValue.applyDimension(
-                                TypedValue.COMPLEX_UNIT_DIP, 8F, resources.displayMetrics
-                            ).toInt()
-                        )
-                    ).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true)
-                        .into(binding.addPhotoButton)
-                    isPhotoChanged = true
-                    playlist.pathToPlaylistIcon = uri.toString()
+        galleryIntentLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val uri = result.data?.data
+                    if (uri != null) {
+                        Glide.with(requireContext()).load(uri).centerCrop().transform(
+                            RoundedCorners(
+                                TypedValue.applyDimension(
+                                    TypedValue.COMPLEX_UNIT_DIP, 8F, resources.displayMetrics
+                                ).toInt()
+                            )
+                        ).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true)
+                            .into(binding.addPhotoButton)
+                        isPhotoChanged = true
+                        playlist.pathToPlaylistIcon = uri.toString()
+                    }
                 }
             }
 
         with(binding) {
             backButton.setNavigationOnClickListener {
-                if (isPhotoChanged || nameOfPlaylist.text.isNotEmpty() || descriptionOfPlaylist.text.isNotEmpty()) {
-                    MaterialAlertDialogBuilder(requireContext()).setTitle(getString(R.string.message_of_playlist_dialog))
-                        .setMessage(getString(R.string.message_text_of_playlist_dialog))
-                        .setNegativeButton(getString(R.string.cancel)) { dialog, which ->
-                        }.setPositiveButton(R.string.complete) { dialog, which ->
-                            findNavController().navigateUp()
-                        }.show()
-                } else findNavController().navigateUp()
+                handleBackButtonPress()
             }
 
             nameOfPlaylist.doOnTextChanged { text, _, _, _ ->
                 val trimmedText = text?.toString()?.trim()
                 val isTextValid = !trimmedText.isNullOrEmpty() && trimmedText.isNotBlank()
                 val hasFocus = nameOfPlaylist.hasFocus()
-
                 updateEditTextState(
                     editText = nameOfPlaylist,
                     title = titleNameOfPlaylist,
                     hasFocus = hasFocus,
                     isTextValid = isTextValid
                 )
-
                 createPlaylistButton.isEnabled = isTextValid
                 binding.createPlaylistButton.isClickable = isTextValid
-
                 if (isTextValid) {
                     createPlaylistButton.setBackgroundResource(R.drawable.button_pressed)
                 } else {
@@ -127,7 +132,6 @@ class PlaylistMakerFragment : Fragment() {
                 val trimmedText = text?.toString()?.trim()
                 val isTextValid = !trimmedText.isNullOrEmpty() && trimmedText.isNotBlank()
                 val hasFocus = descriptionOfPlaylist.hasFocus()
-
                 updateEditTextState(
                     editText = descriptionOfPlaylist,
                     title = titleDescriptionOfPlaylist,
@@ -155,7 +159,7 @@ class PlaylistMakerFragment : Fragment() {
                     requester.request(Manifest.permission.READ_MEDIA_IMAGES).collect { result ->
                         when (result) {
                             is PermissionResult.Granted -> {
-                                pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                                launchGalleryIntent()
                             }
 
                             is PermissionResult.Denied.DeniedPermanently -> {
@@ -182,15 +186,110 @@ class PlaylistMakerFragment : Fragment() {
             }
 
             createPlaylistButton.setOnClickListener {
-                playlist.playlistName = nameOfPlaylist.text.toString().trim()
-                playlist.playlistDescription = descriptionOfPlaylist.text.toString()
-                viewModel.onPlaylistCreate(
-                    playlist, playlist.pathToPlaylistIcon?.let { Uri.parse(it) })
-                val playlistName = "Плейлист ${playlist.playlistName} создан"
-                findNavController().navigateUp()
-                Toast.makeText(requireContext(), playlistName, Toast.LENGTH_SHORT).show()
+                handleCreateOrSaveButton()
             }
         }
+    }
+
+    private fun handleBackButtonPress() {
+        if (playlist.playlistName != null) {
+            findNavController().navigateUp()
+        } else {
+            if (isPhotoChanged || binding.nameOfPlaylist.text.isNotEmpty() || binding.descriptionOfPlaylist.text.isNotEmpty()) {
+                MaterialAlertDialogBuilder(requireContext()).setTitle(getString(R.string.message_of_playlist_dialog))
+                    .setMessage(getString(R.string.message_text_of_playlist_dialog))
+                    .setNegativeButton(getString(R.string.cancel)) { dialog, which ->
+                    }.setPositiveButton(R.string.complete) { dialog, which ->
+                        findNavController().navigateUp()
+                    }.show()
+            } else {
+                findNavController().navigateUp()
+            }
+        }
+    }
+
+    private fun handleCreateOrSaveButton() {
+        playlist.playlistName = binding.nameOfPlaylist.text.toString().trim()
+        playlist.playlistDescription = binding.descriptionOfPlaylist.text.toString()
+        if (currentPlaylistId != -1) {
+            val updatedPlaylist = playlist.copy(
+                playlistName = playlist.playlistName,
+                playlistDescription = playlist.playlistDescription,
+                pathToPlaylistIcon = playlist.pathToPlaylistIcon
+            )
+            val imageUriForUpdate = if (isPhotoChanged) {
+                playlist.pathToPlaylistIcon?.let { Uri.parse(it) }
+            } else {
+                null
+            }
+            viewModel.updatePlaylist(updatedPlaylist, imageUriForUpdate)
+            findNavController().popBackStack()
+        } else {
+            val newPlaylist = playlist.copy(
+                playlistName = playlist.playlistName,
+                playlistDescription = playlist.playlistDescription,
+                pathToPlaylistIcon = playlist.pathToPlaylistIcon
+            )
+            viewModel.onPlaylistCreate(
+                newPlaylist, playlist.pathToPlaylistIcon?.let { Uri.parse(it) })
+
+            val playlistName = "Плейлист \"${playlist.playlistName}\" создан"
+            Toast.makeText(requireContext(), playlistName, Toast.LENGTH_SHORT).show()
+            findNavController().navigateUp()
+        }
+    }
+
+    private fun setupObservers() {
+        viewModel.playlistStateLiveData().observe(viewLifecycleOwner) { state ->
+            render(state)
+            if (state is PlaylistsState.PlaylistContent) {
+                setupEditModeIfNeeded()
+            }
+        }
+    }
+
+    private fun render(state: PlaylistsState) {
+        when (state) {
+            is PlaylistsState.PlaylistContent -> loadPlaylist(state.playlist)
+        }
+    }
+
+    private fun loadPlaylist(playlist: Playlist?) {
+        this.playlist = playlist!!
+    }
+
+    private fun setupEditModeIfNeeded() {
+        if (currentPlaylistId != -1) {
+            binding.backButton.title = getString(R.string.to_redact)
+            binding.createPlaylistButton.text = getString(R.string.to_save)
+            binding.nameOfPlaylist.setText(playlist.playlistName)
+            binding.descriptionOfPlaylist.setText(playlist.playlistDescription)
+            playlist.pathToPlaylistIcon?.let { imagePath ->
+                Glide.with(requireContext()).load(imagePath).centerCrop().transform(
+                    RoundedCorners(
+                        TypedValue.applyDimension(
+                            TypedValue.COMPLEX_UNIT_DIP, 8F, resources.displayMetrics
+                        ).toInt()
+                    )
+                ).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true)
+                    .into(binding.addPhotoButton)
+                isPhotoChanged = true
+            }
+            val isNameValid = !playlist.playlistName.isNullOrEmpty()
+            binding.createPlaylistButton.isEnabled = isNameValid
+            binding.createPlaylistButton.isClickable = isNameValid
+            if (isNameValid) {
+                binding.createPlaylistButton.setBackgroundResource(R.drawable.button_pressed)
+            }
+        }
+    }
+
+    private fun launchGalleryIntent() {
+        val intent = Intent(Intent.ACTION_PICK).apply {
+            type = "image/*"
+            putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/jpeg", "image/png", "image/jpg"))
+        }
+        galleryIntentLauncher.launch(intent)
     }
 
     private fun updateEditTextState(

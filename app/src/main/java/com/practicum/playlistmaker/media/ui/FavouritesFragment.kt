@@ -22,7 +22,7 @@ import org.koin.androidx.viewmodel.ext.android.getViewModel
 class FavouritesFragment : Fragment() {
 
     private lateinit var viewModel: FavouritesViewModel
-    private lateinit var onMovieClickDebounce: (Track) -> Unit
+    private lateinit var onTrackClickDebounce: (Track) -> Unit
     private var _binding: FragmentFavoritesBinding? = null
     private val binding get() = _binding!!
     private lateinit var favouritesAdapter: TrackListAdapter
@@ -42,7 +42,7 @@ class FavouritesFragment : Fragment() {
 
         viewModel = getViewModel()
 
-        onMovieClickDebounce = debounce<Track>(
+        onTrackClickDebounce = debounce<Track>(
             CLICK_DEBOUNCE_DELAY, viewLifecycleOwner.lifecycleScope, false
         ) { track ->
             viewModel.addTrack(track)
@@ -59,10 +59,15 @@ class FavouritesFragment : Fragment() {
     }
 
     private fun setupViews() {
-        favouritesAdapter = TrackListAdapter(tracks) { track ->
-            (activity as RootActivity).animateBottomNavigationView()
-            onMovieClickDebounce(track)
-        }
+        favouritesAdapter = TrackListAdapter(
+            tracks,
+            onTrackClick = { track ->
+                (activity as RootActivity).animateBottomNavigationView()
+                onTrackClickDebounce(track)
+            },
+            onTrackLongClick = { track ->
+            }
+        )
         binding.rvTrackList.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         binding.rvTrackList.adapter = favouritesAdapter

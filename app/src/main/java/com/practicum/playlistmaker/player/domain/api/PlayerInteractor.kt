@@ -12,4 +12,5 @@ interface PlayerInteractor {
     fun resetTimer(): String?
     fun getMediaPlayer(): MediaPlayer
     suspend fun getIdTracks(): List<Int>
+    fun reset()
 }

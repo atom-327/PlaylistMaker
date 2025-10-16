@@ -23,7 +23,7 @@ class PlaylistsFragment : Fragment() {
     private lateinit var viewModel: PlaylistsViewModel
     private var _binding: FragmentPlaylistsBinding? = null
     private val binding get() = _binding!!
-    private lateinit var onMovieClickDebounce: (Playlist) -> Unit
+    private lateinit var onPlaylistClickDebounce: (Playlist) -> Unit
     private lateinit var playlistsAdapter: PlaylistsAdapter
     private val playlists = mutableListOf<Playlist>()
 
@@ -40,13 +40,17 @@ class PlaylistsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         viewModel = getViewModel()
 
-        onMovieClickDebounce = debounce<Playlist>(
+        onPlaylistClickDebounce = debounce<Playlist>(
             PlaylistsFragment.Companion.CLICK_DEBOUNCE_DELAY,
             viewLifecycleOwner.lifecycleScope,
             false
         ) { playlist ->
+            val bundle = Bundle().apply {
+                putInt("playlistId", playlist.playlistId)
+            }
             findNavController().navigate(
-                R.id.action_mediaFragment_to_playlistInfoFragment
+                R.id.action_mediaFragment_to_playlistInfoFragment,
+                bundle
             )
         }
 
@@ -67,7 +71,7 @@ class PlaylistsFragment : Fragment() {
 
             playlistsAdapter = PlaylistsAdapter(playlists) { playlist ->
                 (activity as RootActivity).animateBottomNavigationView()
-                onMovieClickDebounce(playlist)
+                onPlaylistClickDebounce(playlist)
             }
             rvPlaylists.layoutManager = GridLayoutManager(requireContext(), 2)
             rvPlaylists.adapter = playlistsAdapter
@@ -75,7 +79,7 @@ class PlaylistsFragment : Fragment() {
     }
 
     private fun setupObservers() {
-        viewModel.observeState().observe(viewLifecycleOwner) { state ->
+        viewModel.playlistStateLiveData().observe(viewLifecycleOwner) { state ->
             render(state)
         }
     }

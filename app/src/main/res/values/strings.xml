@@ -13,7 +13,7 @@
     <string name="messageToSupport">Спасибо разработчикам и разработчицам за крутое приложение!</string>
     <string name="messageToShareApp">https://practicum.yandex.ru/profile/android-developer-plus/</string>
     <string name="agreementLink">https://yandex.ru/legal/practicum_offer/</string>
-    <string name="trackInfo">%1$s • %2$s</string>
+    <string name="doubleInfo">%1$s • %2$s</string>
     <string name="something_went_wrong">Проблемы со связью\n\nЗагрузка не удалась. Проверьте подключение к интернету</string>
     <string name="server_error">Ошибка сервера</string>
     <string name="nothing_found">Ничего не нашлось</string>
@@ -38,13 +38,29 @@
     <string name="message_text_of_playlist_dialog">Все несохраненные данные будут потеряны</string>
     <string name="cancel">Отмена</string>
     <string name="complete">Завершить</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
     <string name="add_to_playlist">Добавить в плейлист</string>
     <string name="trackAdd">Добавлено в плейлист</string>
     <string name="trackAdded">Трек уже добавлен в плейлист</string>
+    <string name="share_playlist">Поделиться</string>
+    <string name="change_playlist_info">Редактировать информацию</string>
+    <string name="delete_playlist">Удалить плейлист</string>
+    <string name="playlist_is_empty">В этом плейлисте нет списка треков, которым можно поделиться</string>
+    <string name="to_delete_track_from_playlist">Хотите удалить трек?</string>
+    <string name="to_redact">Редактировать</string>
+    <string name="to_save">Сохранить</string>
+    <string name="empty_playlist_placeholder">В этом плейлисте\nнет ни одного трека</string>
     <plurals name="tracks_count">
         <item quantity="one">%d трек</item>
         <item quantity="few">%d трека</item>
         <item quantity="many">%d треков</item>
         <item quantity="other">%d треков</item>
+    </plurals>
+    <plurals name="minutes_count">
+        <item quantity="one">%d минута</item>
+        <item quantity="few">%d минуты</item>
+        <item quantity="many">%d минут</item>
+        <item quantity="other">%d минут</item>
     </plurals>
 </resources>

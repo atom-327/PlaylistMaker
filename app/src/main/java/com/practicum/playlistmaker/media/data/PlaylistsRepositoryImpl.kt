@@ -1,6 +1,7 @@
 package com.practicum.playlistmaker.media.data
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -39,8 +40,9 @@ class PlaylistsRepositoryImpl(
         playlistDAO.insertPlaylist(playlistEntity)
     }
 
-    override suspend fun deletePlaylist(playlist: Playlist) {
-        playlistDAO.deletePlaylist(convertToPlaylistEntity(playlist))
+    override suspend fun deletePlaylist(playlistId: Int) {
+        playlistDAO.deletePlaylistById(playlistId)
+        cleanupOrphanTracks()
     }
 
     override fun getPlaylists(): Flow<List<Playlist>> = flow {
@@ -81,10 +83,6 @@ class PlaylistsRepositoryImpl(
         }
     }
 
-    override suspend fun deleteTrack(track: Track) {
-        addedTrackDAO.deleteTrack(convertToTrackEntity(track))
-    }
-
     override suspend fun getPlaylistById(playlistId: Int): Playlist? {
         return playlistDAO.getPlaylistById(playlistId)?.let { playlistDbConvertor.map(it) }
     }
@@ -110,5 +108,73 @@ class PlaylistsRepositoryImpl(
         }
 
         return file.absolutePath
+    }
+
+    override fun getTracksByPlaylistId(playlistId: Int): Flow<List<Track>> = flow {
+        val playlist = playlistDAO.getPlaylistById(playlistId)
+        val trackIds = playlist?.tracks?.split(",")?.mapNotNull { it.toIntOrNull() } ?: emptyList()
+        if (trackIds.isEmpty()) {
+            emit(emptyList())
+        } else {
+            val trackEntities = addedTrackDAO.getTracksByIds(trackIds)
+            val reversedTrackIds = trackIds.reversed()
+            val tracks = reversedTrackIds.mapNotNull { trackId ->
+                trackEntities.find { it.trackId == trackId }?.let { addedTrackDbConvertor.map(it) }
+            }
+            emit(tracks)
+        }
+    }
+
+    override suspend fun deleteTrackFromPlaylist(trackId: Int, playlistId: Int) {
+        val playlist = playlistDAO.getPlaylistById(playlistId)
+        val currentTracks = playlist!!.tracks?.split(",")?.toMutableList() ?: mutableListOf()
+        currentTracks.remove(trackId.toString())
+        val updatedTracks = currentTracks.joinToString(",")
+        val updatedPlaylist = playlist.copy(
+            tracks = updatedTracks, numberOfTracks = currentTracks.size
+        )
+        playlistDAO.updatePlaylist(updatedPlaylist)
+        cleanupOrphanTracks()
+    }
+
+    override suspend fun cleanupOrphanTracks() {
+        val allPlaylists = playlistDAO.getPlaylists()
+        val allTrackIdsInPlaylists = allPlaylists.flatMap { playlist ->
+            playlist.tracks?.split(",")?.mapNotNull { it.toIntOrNull() } ?: emptyList()
+        }.toSet()
+        val allTracks = addedTrackDAO.getTracksByIds(allTrackIdsInPlaylists.toList())
+        allTracks.forEach { track ->
+            if (!allTrackIdsInPlaylists.contains(track.trackId)) {
+                addedTrackDAO.deleteTrackById(track.trackId)
+            }
+        }
+    }
+
+    override fun sharePlaylist(message: String) {
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, message)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        context.startActivity(shareIntent)
+    }
+
+    override suspend fun updatePlaylist(playlist: Playlist, imageUri: Uri?) {
+        val imagePath = when {
+            imageUri == null -> playlist.pathToPlaylistIcon
+            isInternalStorageUri(imageUri) -> imageUri.toString()
+            else -> saveImageToPrivateStorage(imageUri)
+        }
+        val playlistWithImage = playlist.copy(pathToPlaylistIcon = imagePath)
+        val playlistEntity = convertToPlaylistEntity(playlistWithImage)
+        playlistDAO.updatePlaylist(playlistEntity)
+    }
+
+    private fun isInternalStorageUri(uri: Uri): Boolean {
+        val uriString = uri.toString()
+        return uriString.startsWith("/storage/emulated/0/Android/data/${context.packageName}/") ||
+                uriString.startsWith(
+                    context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)?.path ?: ""
+                )
     }
 }
